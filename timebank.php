@@ -23,6 +23,12 @@ define( 'TB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // Include backend buttons
 include_once( plugin_dir_path( __FILE__ ) . 'admin/admin_buttons.php');
 
+// Include timebank post-type
+include_once( plugin_dir_path( __FILE__ ) . 'admin/tbank-post-type.php');
+
+// Include backend admin configuration
+include_once( plugin_dir_path( __FILE__ ) . 'admin/config.php');
+
 // INSTALL HOOK when plugin is activated
 function timebank_install(){
 	include_once "admin/install.php";

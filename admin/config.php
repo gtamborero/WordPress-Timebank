@@ -1,18 +1,18 @@
 <?php
 
-function wporg_add_custom_box() {
+function tbank_custom_box() {
 		add_meta_box(
-			'wporg_box_id',                 // Unique ID
+			'tbank_box_id',                 // Unique ID
 			'Timebank - User Transactions',      // Box title
-			'wporg_custom_box_html',  // Content callback, must be of type callable
-			'tb-transaction',                           // Post type
+			'tbank_custom_box_html',  // Content callback, must be of type callable
+			'tbank-transaction',      // Post type
             'normal',
             'core'
 		);
 }
-add_action( 'add_meta_boxes', 'wporg_add_custom_box' );
+add_action( 'add_meta_boxes', 'tbank_custom_box' );
 
-function wporg_custom_box_html( $post ) {
+function tbank_custom_box_html( $post ) {
 	$timebank_payer = get_post_meta( $post->ID, '_timebank_payer', true );
     $timebank_giver = get_post_meta( $post->ID, '_timebank_giver', true );
 	?>
@@ -56,7 +56,7 @@ function wporg_custom_box_html( $post ) {
 	<?php
 }
 
-function wporg_save_postdata( $post_id ) {
+function tbank_save_postdata( $post_id ) {
 	if ( array_key_exists( 'timebank_payer', $_POST ) ) {
 		update_post_meta(
 			$post_id,
@@ -72,66 +72,11 @@ function wporg_save_postdata( $post_id ) {
 		);
 	}
 }
-add_action( 'save_post', 'wporg_save_postdata' );
-
-
-// USER META FIELD (BIRTHDAY)
-function tm_additional_profile_fields( $user ) {
-
-    $months 	= array( 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' );
-    $default	= array( 'day' => 1, 'month' => 'Jnuary', 'year' => 1950, );
-    $birth_date = wp_parse_args( get_the_author_meta( 'birth_date', $user->ID ), $default );
-
-    ?>
-    <h3>Extra profile information</h3>
-
-    <table class="form-table">
-   	 <tr>
-   		 <th><label for="birth-date-day">Birth date</label></th>
-   		 <td>
-   			 <select id="birth-date-day" name="birth_date[day]"><?php
-   				 for ( $i = 1; $i <= 31; $i++ ) {
-   					 printf( '<option value="%1$s" %2$s>%1$s</option>', $i, selected( $birth_date['day'], $i, false ) );
-   				 }
-   			 ?></select>
-   			 <select id="birth-date-month" name="birth_date[month]"><?php
-   				 foreach ( $months as $month ) {
-   					 printf( '<option value="%1$s" %2$s>%1$s</option>', $month, selected( $birth_date['month'], $month, false ) );
-   				 }
-   			 ?></select>
-   			 <select id="birth-date-year" name="birth_date[year]"><?php
-   				 for ( $i = 1950; $i <= 2015; $i++ ) {
-   					 printf( '<option value="%1$s" %2$s>%1$s</option>', $i, selected( $birth_date['year'], $i, false ) );
-   				 }
-   			 ?></select>
-   		 </td>
-   	 </tr>
-    </table>
-    <?php
-}
-
-add_action( 'show_user_profile', 'tm_additional_profile_fields' );
-add_action( 'edit_user_profile', 'tm_additional_profile_fields' );
-
-function tm_save_profile_fields( $user_id ) {
-
-    if ( ! current_user_can( 'edit_user', $user_id ) ) {
-   	 return false;
-    }
-
-    if ( empty( $_POST['birth_date'] ) ) {
-   	 return false;
-    }
-
-    update_usermeta( $user_id, 'birth_date', $_POST['birth_date'] );
-}
-
-add_action( 'personal_options_update', 'tm_save_profile_fields' );
-add_action( 'edit_user_profile_update', 'tm_save_profile_fields' );
+add_action( 'save_post', 'tbank_save_postdata' );
 
 
 // ADD COLUMN ON TRANSACTIONS POST TYPE
-function add_admin_column( $column_title, $post_type, $cb, $order_by = false, $order_by_field_is_meta = false ){
+function tbank_add_admin_column( $column_title, $post_type, $cb, $order_by = false, $order_by_field_is_meta = false ){
 
     // Column Header
     add_filter( 'manage_' . $post_type . '_posts_columns', function( $columns ) use ($column_title) {
@@ -174,12 +119,12 @@ function add_admin_column( $column_title, $post_type, $cb, $order_by = false, $o
 
 }
 
-add_admin_column(__('Time Payer'), 'post', function($post_id){
+tbank_add_admin_column(__('Time Payer'), 'tbank-transaction', function($post_id){
     //var_dump(get_post_meta( $post_id ));
     echo get_post_meta( $post_id , '_timebank_payer' , true ); 
 }, '_timebank_payer', true);
 
-add_admin_column(__('Time Giver'), 'post', function($post_id){
+tbank_add_admin_column(__('Time Giver'), 'tbank-transaction', function($post_id){
     //var_dump(get_post_meta( $post_id ));
     echo get_post_meta( $post_id , '_timebank_giver' , true ); 
 }, '_timebank_giver', true);
