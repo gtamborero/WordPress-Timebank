@@ -105,12 +105,11 @@ function timebank_load_textdomain() {
 add_shortcode('timebank_exchange', 'timebank_user_exchanges_view');
 
 
-add_action( 'loop_end', 'wpse_141253_loop_end' );
-function wpse_141253_loop_end()
+add_action( 'loop_end', 'timebank_author_loop_end' );
+function timebank_author_loop_end()
 {
   if( is_author() )
   {
-    echo '<div></div>
-    <div> -------- MY AD HERE ------- </div>';
+    echo '<div style="width:100%;"> TBank here! on author when not buddy... configurable? </div>';
   }
 }  
