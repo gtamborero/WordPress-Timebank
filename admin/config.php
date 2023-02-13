@@ -210,7 +210,8 @@ if (!function_exists('extend_admin_search')) {
     function extend_admin_search() {
         global $typenow;
 
-        if ($typenow === 'post') {
+        // Only search if post type is tbank
+        if ($typenow === 'tbank-transaction') {
             add_filter('posts_search', 'posts_search_custom_post_type', 10, 2);
         }
     }
@@ -231,7 +232,8 @@ if (!function_exists('extend_admin_search')) {
                 and meta_key in ('_timebank_payer','_timebank_payer')
                 and meta_value like %s
             )
-        ";
+            ";
+            
             $like   = '%' . $wpdb->esc_like($query->query['s']) . '%';
             $search = preg_replace("#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
                 $wpdb->prepare($sql, $like), $search);
