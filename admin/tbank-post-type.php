@@ -38,7 +38,7 @@ if ( ! function_exists('tbank_transaction') ) {
             'label'                 => __( 'Transaction', 'tbank' ),
             'description'           => __( 'TimeBank Transactions view', 'tbank' ),
             'labels'                => $labels,
-            'supports'              => array( 'title', 'editor' ),
+            'supports'              => array( 'title' ),
             /*'taxonomies'            => array( 'category', 'post_tag' ),*/
             'hierarchical'          => false,
             'public'                => true,
