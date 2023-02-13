@@ -114,7 +114,7 @@ function tbank_save_postdata( $post_id ) {
 		update_post_meta(
 			$post_id,
 			'_timebank_amount',
-			$_POST['timebank_amount']
+			trim($_POST['timebank_amount'])
 		);
 	}
     if ( array_key_exists( 'timebank_rating', $_POST ) ) {
@@ -128,7 +128,7 @@ function tbank_save_postdata( $post_id ) {
 		update_post_meta(
 			$post_id,
 			'_timebank_comment',
-			$_POST['timebank_comment']
+			trim($_POST['timebank_comment'])
 		);
 	}
 }
