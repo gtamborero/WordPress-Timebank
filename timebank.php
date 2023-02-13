@@ -21,7 +21,7 @@ define( 'TB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE_
 define( 'TB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Include backend buttons
-include_once( plugin_dir_path( __FILE__ ) . 'admin/admin_buttons.php');
+include_once( plugin_dir_path( __FILE__ ) . 'admin/admin_menu_buttons.php');
 
 // Include timebank post-type
 include_once( plugin_dir_path( __FILE__ ) . 'admin/tbank-post-type.php');
@@ -110,6 +110,6 @@ function timebank_author_loop_end()
 {
   if( is_author() )
   {
-    echo '<div style="width:100%;"> TBank here! on author when not buddy... configurable? </div>';
+    echo '<div style="width:100%; background-color:#ddd; padding:20px;"> TBank here! on author when not buddy... configurable? </div>';
   }
 }  
