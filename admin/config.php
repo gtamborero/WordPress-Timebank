@@ -19,11 +19,13 @@ function tbank_custom_box_html( $post ) {
 	$timebank_payer = get_post_meta( $post->ID, '_timebank_payer', true );
     $timebank_receiver = get_post_meta( $post->ID, '_timebank_receiver', true );
     $timebank_amount = get_post_meta( $post->ID, '_timebank_amount', true );
+    $timebank_rating = get_post_meta( $post->ID, '_timebank_rating', true );
+    $timebank_comment = get_post_meta( $post->ID, '_timebank_comment', true );
     
 ?>
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+<div class="tbank-edit-grid">
 
-    <label> Time Payer:<br>
+    <label>Time Payer:<br>
         <select name="timebank_payer" id="timebank_payer" class="postbox">
 
             <option value="">Select user...</option>
@@ -61,7 +63,34 @@ function tbank_custom_box_html( $post ) {
         <input type="text" id="timebank_amount" name="timebank_amount" value="<?php echo $timebank_amount; ?>">
     </label>
 
+    <label> Rating: (1 to 5 stars)<br>
+        <input type="number" step="1" min="1" max="5" id="timebank_rating" name="timebank_rating" 
+        value="<?php echo $timebank_rating; ?>">
+    </label>
+
+    <label style="grid-column: 1 / -1;"> Payer Comment:<br>
+        <textarea id="timebank_comment" name="timebank_comment" rows="3" maxlength="200"><?php echo $timebank_comment; ?>
+        </textarea>
+    </label>
+
 </div>
+
+<style>
+    .tbank-edit-grid{
+        display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px 20px; padding:10px 10px 10px 0;
+    }
+    .tbank-edit-grid input{ width:100%;}
+    .tbank-edit-grid textarea{ width:100%;}
+    .tbank-edit-grid select{ width:100%;}
+
+    @media (max-width:990px){
+        .tbank-edit-grid{
+        grid-template-columns:1fr; 
+    }        
+    }
+</style>
+
+
 <?php
 }
 
@@ -86,6 +115,20 @@ function tbank_save_postdata( $post_id ) {
 			$post_id,
 			'_timebank_amount',
 			$_POST['timebank_amount']
+		);
+	}
+    if ( array_key_exists( 'timebank_rating', $_POST ) ) {
+		update_post_meta(
+			$post_id,
+			'_timebank_rating',
+			$_POST['timebank_rating']
+		);
+	}
+    if ( array_key_exists( 'timebank_comment', $_POST ) ) {
+		update_post_meta(
+			$post_id,
+			'_timebank_comment',
+			$_POST['timebank_comment']
 		);
 	}
 }
@@ -150,6 +193,10 @@ tbank_add_admin_column(__('Time Giver'), 'tbank-transaction', function($post_id)
 tbank_add_admin_column(__('Amount'), 'tbank-transaction', function($post_id){
     echo get_post_meta( $post_id , '_timebank_amount' , true ); 
 }, '_timebank_amount', true);
+
+tbank_add_admin_column(__('Rating'), 'tbank-transaction', function($post_id){
+    echo get_post_meta( $post_id , '_timebank_rating' , true ); 
+}, '_timebank_rating', true);
 
 
 // CUSTOM SEARCH INSIDE META (para buscar usuarios timebank)
