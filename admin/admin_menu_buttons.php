@@ -12,6 +12,6 @@ function timebank_menu() {
 	add_submenu_page( 'null', __('Edit Exchange' , 'timebank'), 'Edit Exchange', 'manage_options', 'timebank_editexchange', 'timebank_editexchange');
 
 	//Register CSS Admin Style
-	wp_register_style( 'timebank-style', plugins_url('css/adminstyle.css', __FILE__) );
-    wp_enqueue_style( 'timebank-style' );
+	//wp_register_style( 'timebank-style', plugins_url('css/adminstyle.css', __FILE__) );
+    //wp_enqueue_style( 'timebank-style' );
 }
