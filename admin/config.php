@@ -34,7 +34,7 @@ function tbank_custom_box_html( $post ) {
             foreach ($users as $user){ 
             ?>
 
-                <option value="<?php echo $user->user_login; ?>" <?php selected( $timebank_payer, $user->user_login ); ?>>
+                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_payer, $user->user_login ); ?>>
                     <?php echo $user->user_login; ?>
                 </option>
 
@@ -51,7 +51,7 @@ function tbank_custom_box_html( $post ) {
             foreach ($users as $user){ 
             ?>
 
-                <option value="<?php echo $user->user_login; ?>" <?php selected( $timebank_receiver, $user->user_login ); ?>>
+                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_receiver, $user->user_login ); ?>>
                     <?php echo $user->user_login; ?>
                 </option>
 
