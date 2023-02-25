@@ -54,7 +54,7 @@ function timebank_uninstall(){
 // Save errors on log file
 add_action('activated_plugin','save_error');
 function save_error(){
-file_put_contents(plugin_dir_path( __FILE__ ). 'log_error_activation.txt', ob_get_contents());
+file_put_contents(plugin_dir_path( __FILE__ ). 'log_error_activation_timebank.txt', ob_get_contents());
 }
 
 //USER FUNCTIONS (public)
@@ -73,7 +73,7 @@ function timebank_stylesheet(){
 
 //include_once "admin/tbank_widget.php";
 
-//BUDDY PRESS HOOK
+//BUDDY PRESS HOOK / BUDDYBOSS?
 add_action( 'bp_setup_nav', 'add_timebank_nav_tab' , 100 );
 function add_timebank_nav_tab() {
 bp_core_new_nav_item( array(
@@ -92,9 +92,6 @@ bp_core_load_template( apply_filters( 'bp_core_template_plugin', 'members/single
 add_action( 'bp_template_content','timebank_user_exchanges_view' );
 }
 
-// AJAX FUNCTIONS
-//include( plugin_dir_path( __FILE__ ) . 'user/ajax.php');
-
 // TRANSLATION
 add_action( 'plugins_loaded', 'timebank_load_textdomain' );
 function timebank_load_textdomain() {
@@ -104,12 +101,14 @@ function timebank_load_textdomain() {
 //SHORT CODE CREATION inside block
 add_shortcode('timebank_exchange', 'timebank_user_exchanges_view');
 
-
+// Add on author page end timebank page
 add_action( 'loop_end', 'timebank_author_loop_end' );
 function timebank_author_loop_end()
 {
   if( is_author() )
   {
-    echo '<div style="width:100%; background-color:#ddd; padding:20px;"> TBank here! on author when not buddy... configurable? </div>';
+    echo '<div style="width:100%; background-color:#fff; padding:20px;"> TBank here! on author when not buddy... configurable?<br>';
+    timebank_user_exchanges_view();
+    echo '<br> </div>';
   }
 }  
