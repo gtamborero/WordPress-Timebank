@@ -57,11 +57,11 @@ function save_error(){
 file_put_contents(plugin_dir_path( __FILE__ ). 'log_error_activation_timebank.txt', ob_get_contents());
 }
 
-//USER FUNCTIONS (public)
-function timebank_user_exchanges_view(){
-  echo "go timebank";
-  return "Lanzo TB";
-  //if(!is_admin()) include_once "user/exchanges_view.php";
+// Include timebank_front.php view if not in backend
+function timebank_front_view(){
+  /*if(!is_admin())*/ 
+  include_once "front/timebank_front.php";
+  return ob_get_clean();
 }
 
 //CSS STYLE FOR PUBLIC
@@ -80,16 +80,21 @@ bp_core_new_nav_item( array(
     'name' => __( 'TimeBank', 'timebank' ),
     'slug' => 'timebank',
     'position' => 80,
-    'screen_function' => 'timebank_info',
+    'screen_function' => 'timebank_buddy',
     'default_subnav_slug' => 'timebank'
 ) );
 }
 
-// show feedback when 'Feedback’ tab is clicked
-function timebank_info() {
+// BUDDY PRESS FUNCTION CALL SCREEN
+function timebank_buddy() {
 bp_core_load_template( apply_filters( 'bp_core_template_plugin', 'members/single/plugins' ) );
 //tiene que ir detras este ad action. busca el bp_post template
-add_action( 'bp_template_content','timebank_user_exchanges_view' );
+add_action( 'bp_template_content','timebank_buddy_front_view' );
+}
+
+// BUDDY PRESS RUN FUNCTION
+function timebank_buddy_front_view(){
+  echo timebank_front_view();
 }
 
 // TRANSLATION
@@ -98,8 +103,8 @@ function timebank_load_textdomain() {
   load_plugin_textdomain( 'timebank', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 
-//SHORT CODE CREATION inside block
-add_shortcode('timebank_exchange', 'timebank_user_exchanges_view');
+//SHORT CODE for timebank front view
+add_shortcode('timebank_view', 'timebank_front_view');
 
 // Add on author page end timebank page
 add_action( 'loop_end', 'timebank_author_loop_end' );
@@ -108,7 +113,7 @@ function timebank_author_loop_end()
   if( is_author() )
   {
     echo '<div style="width:100%; background-color:#fff; padding:20px;"> TBank here! on author when not buddy... configurable?<br>';
-    timebank_user_exchanges_view();
+    echo timebank_front_view();
     echo '<br> </div>';
   }
 }  
