@@ -34,8 +34,8 @@ function tbank_custom_box_html( $post ) {
             foreach ($users as $user){ 
             ?>
 
-                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_payer, $user->user_login ); ?>>
-                    <?php echo $user->user_login; ?>
+                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_payer, $user->ID ); ?>>
+                    <?php echo $user->display_name; ?>
                 </option>
 
             <?php } ?>
@@ -51,8 +51,8 @@ function tbank_custom_box_html( $post ) {
             foreach ($users as $user){ 
             ?>
 
-                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_receiver, $user->user_login ); ?>>
-                    <?php echo $user->user_login; ?>
+                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_receiver, $user->ID ); ?>>
+                    <?php echo $user->display_name; ?>
                 </option>
 
             <?php } ?>
@@ -182,12 +182,15 @@ function tbank_add_admin_column( $column_title, $post_type, $cb, $order_by = fal
 
 // CUSTOM ADMIN COLUMNS
 tbank_add_admin_column(__('Time Payer'), 'tbank-transaction', function($post_id){
-//var_dump(get_post_meta( $post_id ));
-    echo get_post_meta( $post_id , '_timebank_payer' , true ); 
+    $userId = get_post_meta( $post_id , '_timebank_payer' , true );
+    $user = get_user_by('id', $userId);
+    echo $user->display_name;
 }, '_timebank_payer', true);
 
 tbank_add_admin_column(__('Time Giver'), 'tbank-transaction', function($post_id){
-    echo get_post_meta( $post_id , '_timebank_receiver' , true ); 
+    $userId = get_post_meta( $post_id , '_timebank_receiver' , true );
+    $user = get_user_by('id', $userId);
+    echo $user->display_name;
 }, '_timebank_receiver', true);
 
 tbank_add_admin_column(__('Amount'), 'tbank-transaction', function($post_id){

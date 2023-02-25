@@ -14,7 +14,7 @@ $args = array(
     'meta_query' => array(
         array(
             'key' => '_timebank_payer',
-            'value' => 'iproject',
+            'value' => $userId,
             'compare' => 'LIKE',
         ),
     ),
