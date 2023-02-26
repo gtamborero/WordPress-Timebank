@@ -26,6 +26,9 @@ include_once( plugin_dir_path( __FILE__ ) . 'admin/admin_menu_buttons.php');
 // Include timebank post-type
 include_once( plugin_dir_path( __FILE__ ) . 'admin/tbank-post-type.php');
 
+// Include timebank functions
+include_once( plugin_dir_path( __FILE__ ) . 'timebank_functions.php');
+
 // Include backend admin configuration
 include_once( plugin_dir_path( __FILE__ ) . 'admin/config.php');
 
@@ -112,7 +115,7 @@ function timebank_author_loop_end()
 {
   if( is_author() )
   {
-    echo '<div style="width:100%; background-color:#fff; padding:20px;"> TBank here! on author when not buddy... configurable?<br>';
+    echo '<div style="width:100%; background-color:#fff; padding:20px;">';
     echo timebank_front_view();
     echo '<br> </div>';
   }
