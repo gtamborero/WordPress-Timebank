@@ -31,28 +31,29 @@ $query = new WP_Query( $args );
 ?>
 
 <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; background-color:#333; color:#fff; padding:10px;">
-    <div>Fecha</div>
-    <div>Descripción</div>
+    <div>Date</div>
+    <div>Description</div>
     <div>Receptor</div>
-    <div>Importe</div>
-    <div>Saldo</div>
-    <div>Valoración</div>
-    <div>Comentario</div>
+    <div>Amount</div>
+    <div>Total</div>
+    <div>Rating</div>
+    <div>Comment</div>
 </div>
 
-<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px;">
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px; gap:15px;">
 <?php
     if ( $query->have_posts() ){
         while ( $query->have_posts() ){
-             $query->the_post(); 
+            $query->the_post();
+            $post = $query->post; 
             ?>
             <div>1 Feb</div>
             <div><?php the_title(); ?></div>
-            <div>Receptor</div>
-            <div>importe</div>
-            <div>Saldo</div>
-            <div>Valoración</div>
-            <div>Comentario</div>
+            <div><?php echo getUserNameById ($post->_timebank_receiver); ?></div>
+            <div><?php echo $post->_timebank_amount; ?></div>
+            <div>Total</div>
+            <div><?php echo printStarts ($post->_timebank_rating); ?></div>
+            <div><?php echo $post->_timebank_comment; ?></div>
 <?php
         }
     } 
@@ -60,7 +61,7 @@ $query = new WP_Query( $args );
 </div>
 
 <?php
-echo "<pre>"; 
-var_dump($query->posts);
+//echo "<pre>"; 
+//var_dump($query->posts);
 ?> 
 
