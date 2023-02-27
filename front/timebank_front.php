@@ -4,64 +4,30 @@
 // If parameter user is set then search transactions of user and add exchange with user button
 // Get user data from transactions posttype
 
-ob_start();
-// Start Timebank front echoing 
 
-$userId = get_current_user_id();
-
-$args = array(
-    'post_type' => 'tbank-transaction',
-    'meta_query' => array(
-       
-        'relation' => 'OR',
-        array(
-            'key' => '_timebank_payer',
-            'value' => $userId,
-            'compare' => '=',
-        ),
-        array(
-            'key' => '_timebank_receiver',
-            'value' => $userId,
-            'compare' => '=',
-        ),
-        
-    ),
-);
-$query = new WP_Query( $args );
 ?>
-
-<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; background-color:#333; color:#fff; padding:10px;">
-    <div>Date</div>
-    <div>Description</div>
-    <div>Receptor</div>
-    <div>Amount</div>
-    <div>Total</div>
-    <div>Rating</div>
-    <div>Comment</div>
-</div>
-
-<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px; gap:15px;">
-<?php
-    if ( $query->have_posts() ){
-        while ( $query->have_posts() ){
-            $query->the_post();
-            $post = $query->post; 
-            ?>
-            <div>1 Feb</div>
-            <div><?php the_title(); ?></div>
-            <div><?php echo getUserNameById ($post->_timebank_receiver); ?></div>
-            <div><?php echo $post->_timebank_amount; ?></div>
-            <div>Total</div>
-            <div><?php echo printStarts ($post->_timebank_rating); ?></div>
-            <div><?php echo $post->_timebank_comment; ?></div>
-<?php
+<script>
+// Carga VideoId + UserId
+    //function getTimebank(){
+    jQuery.ajax({
+        url: "<?php echo site_url(); ?>/wp-json/iproject/v1/timebank_front",
+        type: "GET",
+        data: { 
+            'userId':<?php echo get_current_user_id() ?>,
+            '_wpnonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>',
+        },
+        contentType: "application/json; charset=utf-8",
+        cache: false,
+        success: function(data){
+            //console.log(data);
+            jQuery('#timebank_front').html(data);
+        },
+        error: function(){
+            console.log("Algo salió mal en la consulta api");
+            jQuery('#timebank_front').html("Algo salió mal en la consulta api");
         }
-    } 
-?>
-</div>
+    }); 
+</script>
 
-<?php
-//echo "<pre>"; 
-//var_dump($query->posts);
-?> 
+<div id="timebank_front">Loading...</div>
 

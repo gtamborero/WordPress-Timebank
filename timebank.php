@@ -20,6 +20,12 @@ if (!function_exists ('add_action')){
 define( 'TB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) );
 define( 'TB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
+// Include Timebank API Router
+include_once( plugin_dir_path( __FILE__ ) . 'router.php');
+
+// Include Timebank API Functions
+include_once( plugin_dir_path( __FILE__ ) . 'includes/api_timebank_front.php');
+
 // Include backend buttons
 include_once( plugin_dir_path( __FILE__ ) . 'admin/admin_menu_buttons.php');
 
@@ -64,7 +70,6 @@ file_put_contents(plugin_dir_path( __FILE__ ). 'log_error_activation_timebank.tx
 function timebank_front_view(){
   /*if(!is_admin())*/ 
   include_once "front/timebank_front.php";
-  return ob_get_clean();
 }
 
 //CSS STYLE FOR PUBLIC
