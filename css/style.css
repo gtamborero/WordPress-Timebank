@@ -1,1 +1,13 @@
 /* TRANSACTION VIEW */
+
+.timebank-grid{
+display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px; gap:15px; 
+}
+
+@media (max-width:990px){
+    /* hide comment on mobile */
+    .timebank-grid >div:nth-child(7) { display: none; }
+    .timebank-grid{
+        grid-template-columns:1fr 1fr 1fr; padding:10px; gap:15px; 
+    }
+}
