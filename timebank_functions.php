@@ -8,7 +8,7 @@ function getUserNameById($id){
   return $users[0]->user_login;
 }
 
-function printStarts($number){
+function printStars($number){
     $count = 1;
 	while($count <= $number){
     	$stars .= "&#9733;";

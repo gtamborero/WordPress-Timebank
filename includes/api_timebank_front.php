@@ -74,7 +74,7 @@ if ( !class_exists( 'TimebankAPI' ) ) {
                     }?></div>
 
                     <div>Total</div>
-                    <div><?php echo printStarts ($post->_timebank_rating); ?></div>
+                    <div><?php echo printStars ($post->_timebank_rating); ?></div>
                     <div><?php echo $post->_timebank_comment; ?></div>
         <?php
                 }
