@@ -14,5 +14,10 @@ function printStarts($number){
     	$stars .= "&#9733;";
       $count++;
     }
-    return $stars;
+    return '<span style="color:goldenrod">' . $stars . '</span>';
+}
+
+function isUserTimeReceiver($receiverId){
+  $userId = get_current_user_id();
+  if ($userId == $receiverId) return true;
 }
