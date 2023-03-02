@@ -34,9 +34,9 @@ function tbank_custom_box_html( $post ) {
             foreach ($users as $user){ 
             ?>
 
-                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_payer, $user->ID ); ?>>
-                    <?php echo $user->login; ?>
-                </option>
+            <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_payer, $user->ID ); ?>>
+                <?php echo $user->user_login; ?>
+            </option>
 
             <?php } ?>
         </select>
@@ -51,9 +51,9 @@ function tbank_custom_box_html( $post ) {
             foreach ($users as $user){ 
             ?>
 
-                <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_receiver, $user->ID ); ?>>
-                    <?php echo $user->login; ?>
-                </option>
+            <option value="<?php echo $user->ID; ?>" <?php selected( $timebank_receiver, $user->ID ); ?>>
+                <?php echo $user->user_login; ?>
+            </option>
 
             <?php } ?>
         </select>
@@ -72,7 +72,6 @@ function tbank_custom_box_html( $post ) {
         <textarea id="timebank_comment" name="timebank_comment" rows="3" maxlength="200"><?php echo $timebank_comment; ?>
         </textarea>
     </label>
-
 </div>
 
 <style>
@@ -85,11 +84,10 @@ function tbank_custom_box_html( $post ) {
 
     @media (max-width:990px){
         .tbank-edit-grid{
-        grid-template-columns:1fr; 
-    }        
+            grid-template-columns:1fr; 
+        }        
     }
 </style>
-
 
 <?php
 }
@@ -154,32 +152,29 @@ function tbank_add_admin_column( $column_title, $post_type, $cb, $order_by = fal
     if( !empty( $order_by ) ) {
 
 //order by no funciona  pq se esta buscando el id no el nombre a la vista idem search)
-      // Column Sorting
-      add_filter( 'manage_edit-' . $post_type . '_sortable_columns', function ( $columns ) use ($column_title, $order_by) {
-          $columns[ sanitize_title($column_title) ] = $order_by;
-          return $columns;
-      } );
+        // Column Sorting
+        add_filter( 'manage_edit-' . $post_type . '_sortable_columns', function ( $columns ) use ($column_title, $order_by) {
+            $columns[ sanitize_title($column_title) ] = $order_by;
+            return $columns;
+        } );
 
-      // Column Ordering
-      add_action( 'pre_get_posts', function ( $query ) use ($order_by, $order_by_field_is_meta) {
-          if( ! is_admin() || ! $query->is_main_query() )
-            return;
+        // Column Ordering
+        add_action( 'pre_get_posts', function ( $query ) use ($order_by, $order_by_field_is_meta) {
+            if( ! is_admin() || ! $query->is_main_query() )
+                return;
 
-          if ( sanitize_key($order_by) === $query->get( 'orderby') ) {
-              if($order_by_field_is_meta){
-                  $query->set( 'orderby', 'meta_value' );
-                  $query->set( 'meta_key', sanitize_key($order_by) );
-              }
-              else {
-                  $query->set( 'orderby', sanitize_key($order_by) );
-              }
-          }
-      } );
-  
+            if ( sanitize_key($order_by) === $query->get( 'orderby') ) {
+                if($order_by_field_is_meta){
+                    $query->set( 'orderby', 'meta_value' );
+                    $query->set( 'meta_key', sanitize_key($order_by) );
+                }
+                else {
+                    $query->set( 'orderby', sanitize_key($order_by) );
+                }
+            }
+        });
     }
-
 }
-
 
 // CUSTOM ADMIN COLUMNS
 tbank_add_admin_column(__('Time Payer'), 'tbank-transaction', function($post_id){
@@ -188,7 +183,7 @@ tbank_add_admin_column(__('Time Payer'), 'tbank-transaction', function($post_id)
     echo $user->user_login;
 }, '_timebank_payer', true);
 
-tbank_add_admin_column(__('Time Giver'), 'tbank-transaction', function($post_id){
+tbank_add_admin_column(__('Time Receiver'), 'tbank-transaction', function($post_id){
     $userId = get_post_meta( $post_id , '_timebank_receiver' , true );
     $user = get_user_by('id', $userId);
     echo $user->user_login;
@@ -199,7 +194,7 @@ tbank_add_admin_column(__('Amount'), 'tbank-transaction', function($post_id){
 }, '_timebank_amount', true);
 
 tbank_add_admin_column(__('Rating'), 'tbank-transaction', function($post_id){
-    echo get_post_meta( $post_id , '_timebank_rating' , true ); 
+    echo printStars(get_post_meta( $post_id , '_timebank_rating' , true)); 
 }, '_timebank_rating', true);
 
 
@@ -231,40 +226,14 @@ if (!function_exists('extend_admin_search')) {
 
         if ($query->is_main_query() && !empty($query->query['s'])) {
 
-            // mucho percal, podemos poner un filtro de seleccionar user y apa
-            //Convert user name to ID and fetch ID
-            /*$users = new WP_User_Query( array(
-                'search'         => "*{$query->query['s']}*",
-                'search_columns' => array(
-                    'user_login',
-                    'user_nicename',
-                    'user_email',
-                    'user_display_name',
-                ),
-                'meta_query' => array(
-                    'relation' => 'OR',
-                    array(
-                        'key'     => 'first_name',
-                        'value'   => $query->query['s'],
-                        'compare' => 'LIKE'
-                    ),
-                    array(
-                        'key'     => 'last_name',
-                        'value'   => $query->query['s'],
-                        'compare' => 'LIKE'
-                    )
-                )
-            ) ); 
-            var_dump($users);*/
-
             $sql    = "
             or exists (
-                select * from {$wpdb->postmeta} where post_id={$wpdb->posts}.ID
-                and meta_key in ('_timebank_payer','_timebank_payer')
+                select ID from {$wpdb->postmeta} where post_id={$wpdb->posts}.ID
+                and meta_key in ('_timebank_payer','_timebank_receiver')
                 and meta_value like %s
             )
             ";
-            
+      
             // Podemos alterar este like para transformar la busqueda a ID de usuario
             // Nos entra nombre de usuario
             $user = get_user_by('login', $wpdb->esc_like($query->query['s']));
@@ -272,7 +241,6 @@ if (!function_exists('extend_admin_search')) {
             $search = preg_replace("#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
                 $wpdb->prepare($sql, $like), $search);
         }
-
         return $search;
     }
 }
