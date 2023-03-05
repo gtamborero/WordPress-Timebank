@@ -66,10 +66,9 @@ function save_error(){
 file_put_contents(plugin_dir_path( __FILE__ ). 'log_error_activation_timebank.txt', ob_get_contents());
 }
 
-// Include timebank_front.php view if not in backend
+// Include timebank_front.php view if user is not in backend and not in REST Request (Solving ajax error no save)
 function timebank_front_view(){
-  /*if(!is_admin())*/ 
-  include_once "front/timebank_front.php";
+  if(!(is_admin() || defined('REST_REQUEST'))){ include_once "front/timebank_front.php"; }
 }
 
 //CSS STYLE FOR PUBLIC
