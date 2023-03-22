@@ -13,6 +13,18 @@ function tbank_custom_box() {
 }
 add_action( 'add_meta_boxes', 'tbank_custom_box' );
 
+// Check if user can manage timebank Options
+function userCanManageOptions(){
+    if ( !current_user_can( 'manage_options' ) )  {
+      wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+    }
+}
+
+//ADMIN MENU CONFIGURATION
+function timebank_options() {
+    userCanManageOptions();
+      include_once "configuration_page.php";
+}
 
 // ADD CUSTOM HTML BOX INSIDE ADD / EDIT TRANSACTION
 function tbank_custom_box_html( $post ) {
