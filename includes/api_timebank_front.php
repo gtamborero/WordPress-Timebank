@@ -87,6 +87,10 @@ if ( !class_exists( 'TimebankAPI' ) ) {
         //var_dump($query->posts);
         return ob_get_clean();
         }
+
+        public static function newTransaction() {
+            return "go";
+        }
     }
 
 }
