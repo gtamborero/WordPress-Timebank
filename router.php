@@ -7,9 +7,9 @@ add_action( 'rest_api_init', function () {
         'permission_callback' => '__return_true',
     ));
 
-    register_rest_route( 'iproject/v1', '/open_new_transaction', array(
+    register_rest_route( 'iproject/v1', '/create_new_transaction', array(
         'methods' => 'GET',
-        'callback' => 'TimebankAPI::newTransaction',
+        'callback' => 'TimebankAPI::createNewTransaction',
         'permission_callback' => '__return_true',
     ));
 });
