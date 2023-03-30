@@ -16,6 +16,7 @@ if ( !class_exists( 'TimebankAPI' ) ) {
 
         $args = array(
             'post_type' => 'tbank-transaction',
+            'posts_per_page' => 50, // Max view 50 
             'meta_query' => array(
             
                 'relation' => 'OR',
@@ -37,8 +38,8 @@ if ( !class_exists( 'TimebankAPI' ) ) {
 
         <div class="timebank-grid" style="background-color:#333; color:#fff;">
             <div>Date</div>
-            <div>Description</div>
             <div>User</div>
+            <div>Description</div>
             <div>Amount</div>
             <div>Total</div>
             <div>Rating</div>
@@ -53,8 +54,7 @@ if ( !class_exists( 'TimebankAPI' ) ) {
                     $post = $query->post; 
                     ?>
 
-                    <div><?php the_time( 'l, j/m/Y' ); ?></div>
-                    <div><?php the_title(); ?></div>
+                    <div><?php the_time( 'j/m/Y' ); ?></div>
 
                     <div><?php
                     // Show the name of the sibling user
@@ -65,12 +65,14 @@ if ( !class_exists( 'TimebankAPI' ) ) {
                     }
                     ?></div>
 
+                    <div><?php the_title(); ?></div>
+
                     <div><?php
                     // Show amount as positive or negative value
                     if (isUserTimeReceiver($post->_timebank_receiver)){
-                        echo $post->_timebank_amount; 
+                        echo $post->_timebank_amount . "min";
                     }else{
-                        echo "<span style='color:#900'>- " . $post->_timebank_amount . "</span>";
+                        echo "<span style='color:#900'>- " . $post->_timebank_amount . "min</span>";
                     }?></div>
 
                     <div>Total</div>
@@ -88,7 +90,7 @@ if ( !class_exists( 'TimebankAPI' ) ) {
         return ob_get_clean();
         }
 
-        public static function newTransaction() {
+        public static function createNewTransaction() {
             return "go";
         }
     }
