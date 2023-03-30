@@ -10,6 +10,7 @@ function getUserNameById($id){
 
 function printStars($number){
     $count = 1;
+    $stars = "";
 	while($count <= $number){
     	$stars .= "&#9733;";
       $count++;
