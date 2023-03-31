@@ -1,5 +1,4 @@
 /* TRANSACTION VIEW */
-
 .timebank-grid{
 display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px; gap:15px; 
 }
@@ -9,5 +8,18 @@ display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px; g
     .timebank-grid >div:nth-child(7) { display: none; }
     .timebank-grid{
         grid-template-columns:1fr 1fr 1fr; padding:10px; gap:15px; 
+    }
+}
+
+/* TIMEBANK NEW PAYMENT VIEW */
+#timebank_payment{
+    grid-template-columns: repeat(3, 1fr);
+}
+#timebank_payment > div{
+    padding:5px;
+}
+@media (max-width:990px){
+    #timebank_payment{
+        grid-template-columns: 1fr; 
     }
 }
