@@ -8,7 +8,7 @@ add_action( 'rest_api_init', function () {
     ));
 
     register_rest_route( 'iproject/v1', '/create_new_transaction', array(
-        'methods' => 'GET',
+        'methods' => 'POST',
         'callback' => 'TimebankAPI::createNewTransaction',
         'permission_callback' => '__return_true',
     ));
