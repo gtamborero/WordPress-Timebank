@@ -14,14 +14,14 @@ if ( ! defined('ABSPATH')){
 }
 
 if (!function_exists ('add_action')){
-  echo "Algo estas haciendo mal"; exit();
+  echo "Doing wrong things?"; exit();
 }
 
 define( 'TB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) );
 define( 'TB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Include Timebank API Router
-include_once( plugin_dir_path( __FILE__ ) . 'router.php');
+include_once( plugin_dir_path( __FILE__ ) . 'includes/router.php');
 
 // Include Timebank API Functions
 include_once( plugin_dir_path( __FILE__ ) . 'includes/api_timebank_front.php');
