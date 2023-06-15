@@ -44,16 +44,17 @@ if ( !class_exists( 'TimebankAPI' ) ) {
             <div>Total</div>
             <div>Rating</div>
             <div>Comment</div>
+            <div>View</div>
         </div>
 
-        <div class="timebank-grid">
         <?php
             if ( $query->have_posts() ){
-                while ( $query->have_posts() ){
-                    $query->the_post();
-                    $post = $query->post; 
-                    ?>
+            while ( $query->have_posts() ){
+                $query->the_post();
+                $post = $query->post; 
+                ?>
 
+                <div class="timebank-grid">
                     <div><?php the_time( 'j/m/Y' ); ?></div>
 
                     <div><?php
@@ -77,12 +78,13 @@ if ( !class_exists( 'TimebankAPI' ) ) {
 
                     <div>Total</div>
                     <div><?php echo printStars ($post->_timebank_rating); ?></div>
-                    <div><?php echo $post->_timebank_comment; ?></div>
-        <?php
+                    <div><button style="width:100%;">View</button> <?php /* echo $post->_timebank_comment;*/ ?></div>
+                    <div><button style="width:100%;">+</button> <!-- Mobile view --> </div>
+                </div>
+            <?php
                 }
             } 
-        ?>
-        </div>
+            ?>
 
         <?php
         //echo "<pre>"; 
@@ -90,8 +92,30 @@ if ( !class_exists( 'TimebankAPI' ) ) {
         return ob_get_clean();
         }
 
-        public static function createNewTransaction() {
-            return "go";
+        public static function createNewTransaction( $data ) {
+            // Recibo parametros y me falta comprobar que estan ok e introducirlos en WP
+            $data = $data->get_params();
+
+            // Validate incoming data
+
+            
+            return $data;
+        }
+
+        public static function searchUser( $data ) {
+            // Recibo parametros y me falta comprobar que estan ok e introducirlos en WP
+            $data = $data->get_params();
+
+            $userNamePartial = $data["userName"];
+            $users = get_users(array(
+                'search'         => '*' . $userNamePartial . '*',
+                'search_columns' => array('user_login'),
+            ));
+
+            // Validate incoming data
+            
+
+            return $users;
         }
     }
 

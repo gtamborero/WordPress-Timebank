@@ -12,4 +12,10 @@ add_action( 'rest_api_init', function () {
         'callback' => 'TimebankAPI::createNewTransaction',
         'permission_callback' => '__return_true',
     ));
+
+    register_rest_route( 'iproject/v1', '/search_user', array(
+        'methods' => 'GET',
+        'callback' => 'TimebankAPI::searchUser',
+        'permission_callback' => '__return_true',
+    ));
 });
