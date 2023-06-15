@@ -5,32 +5,33 @@
 // Get user data from transactions posttype
 ?>
 
-<button onclick="openTransaction();" class="button" style="margin-left:auto; display:block;">New Transaction</button><br>
+<div style="padding:15px; background-color:#f5f5f5; margin-bottom:10px;">User data, amount, stats...</div>
+
+<button onclick="openTransaction();" class="button" style="width:100%; margin-left:auto; display:block;">New Transaction / Search user</button><br>
 
 <!-- TIMEBANK PAYMENT CLOSE BUTTON -->
 <button onclick="hideTransaction();" id="timebank_payment_close" style="padding:5px; margin-left:10px; float:right;">X</button>
 
-<style>
-    #timebank_payment{
-        grid-template-columns: repeat(3, 1fr);
-    }
-    #timebank_payment > div{
-        padding:5px;
-    }
-    @media (max-width:990px){
-        #timebank_payment{
-            grid-template-columns: 1fr; 
-        }
-    }
-</style>
 
 <!-- TIMEBANK PAYMENT DIV -->
 <!-- no tengo que cargar nada de servidor hasta que no envie transaccion. todo en local y oculto -->
 <form id="payment_data">
 <div id="timebank_payment" style="padding:15px 0; display:grid;">
         <div>
-            User*: <input name="user" type="text"></input>
+            <input name="userId" placeholder="Start writing the user name..." type="text" oninput="searchUser(this.value);"></input>
         </div>
+        
+        <style>
+            #foundUsers{
+                position: absolute;
+                margin-top:50px;
+                width:500px;
+                height:40px;
+                background-color: #fff;
+                border:1px solid #eee;
+            }
+        </style>
+
         <div>
             Description*: <input name="description" type="text"></input>
         </div>
@@ -43,6 +44,8 @@
         <div>
             Comment: <input name="comment" type="text"></input>
         </div>
+
+        <input type="hidden" name="user-id-creator" value="<?php echo get_current_user_id() ?>">
 
         <button onclick="createNewTransaction();" type="button">SEND TIME</button>
 
@@ -99,21 +102,46 @@ foreach ( $users as $user ) {
     }
 
     function createNewTransaction(){
+        var formData = jQuery('#payment_data').serialize();
         jQuery.ajax({
             url: "<?php echo site_url(); ?>/wp-json/iproject/v1/create_new_transaction",
             type: "POST",
-            data: { 
-                'userId':<?php echo get_current_user_id() ?>,
-                '_wpnonce-transaction': '<?php echo wp_create_nonce( 'wp_rest' ); ?>',
-            },
-            contentType: "application/json; charset=utf-8",
+            data: formData,
+            //ContentType: "application/json; charset=utf-8",
             cache: false,
             success: function(data){
                 console.log(data);
                 // No muestro nada del servidor
                 // Le tengo que preguntar 
-                jQuery('#timebank_payment').html(data);
+                //jQuery('#timebank_payment').html(data);
 
+            },
+            error: function(){
+                console.log("Algo salió mal en createNewTransaction");
+                jQuery('#timebank_front').html("Algo salió mal en createNewTransaction");
+            }
+        }); 
+    }
+
+    function searchUser(userName){
+        
+        jQuery.ajax({
+            url: "<?php echo site_url(); ?>/wp-json/iproject/v1/search_user",
+            type: "GET",
+            data: { userName: userName },
+            //ContentType: "application/json; charset=utf-8",
+            cache: false,
+            success: function(data){
+                
+                data.forEach((user)=>{
+                    //console.log(user.data.user_login);
+                    jQuery('#foundUsers').html(user.data.user_login);
+
+                })
+
+                // No muestro nada del servidor
+                // Le tengo que preguntar 
+                //jQuery('#timebank_payment').html(data);
             },
             error: function(){
                 console.log("Algo salió mal en createNewTransaction");
