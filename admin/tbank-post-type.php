@@ -41,7 +41,7 @@ if ( ! function_exists('tbank_transaction') ) {
             'supports'              => array( 'title' ),
             /*'taxonomies'            => array( 'category', 'post_tag' ),*/
             'hierarchical'          => false,
-            'public'                => true,
+            'public'                => false,
             'show_ui'               => true,
             'show_in_menu'          => true,
             'menu_position'         => 5,
