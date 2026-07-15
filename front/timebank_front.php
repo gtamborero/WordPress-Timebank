@@ -30,8 +30,11 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 	</section>
 
 	<div class="timebank-actions">
-		<button type="button" class="timebank-button timebank-button--primary" id="timebank_open_form">
-			<?php esc_html_e( 'New transaction', 'timebank' ); ?>
+		<button type="button" class="timebank-button timebank-button--primary" data-timebank-mode="send">
+			<?php esc_html_e( 'Send time', 'timebank' ); ?>
+		</button>
+		<button type="button" class="timebank-button" data-timebank-mode="request">
+			<?php esc_html_e( 'Request time', 'timebank' ); ?>
 		</button>
 	</div>
 
@@ -46,9 +49,10 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 			</div>
 
 			<label class="timebank-field timebank-field--wide">
-				<span><?php esc_html_e( 'Receiver user', 'timebank' ); ?></span>
+				<span id="timebank_user_search_label"><?php esc_html_e( 'Receiver user', 'timebank' ); ?></span>
 				<input id="timebank_user_search" type="search" autocomplete="off" placeholder="<?php esc_attr_e( 'Start typing a username...', 'timebank' ); ?>">
 				<input id="timebank_receiver_id" name="receiver_id" type="hidden">
+				<input id="timebank_transaction_mode" name="mode" type="hidden" value="send">
 				<div id="timebank_found_users" class="timebank-user-results" role="listbox" hidden></div>
 			</label>
 
@@ -94,6 +98,8 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		</form>
 	</div>
 
+	<p id="timebank_action_message" class="timebank-message" aria-live="polite"></p>
+
 	<div id="timebank_front" class="timebank-transactions" aria-live="polite">
 		<div class="timebank-loading"><?php esc_html_e( 'Loading transactions...', 'timebank' ); ?></div>
 	</div>
@@ -120,6 +126,7 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 	function resetForm() {
 		$('#timebank_payment').trigger('reset');
 		$('#timebank_receiver_id').val('');
+		$('#timebank_transaction_mode').val('send');
 		setRating(5);
 		$('#timebank_found_users').prop('hidden', true).empty();
 		showMessage('');
@@ -152,7 +159,20 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		paintRating(rating);
 	}
 
-	function openTransactionModal() {
+	function openTransactionModal(mode) {
+		mode = mode === 'request' ? 'request' : 'send';
+		$('#timebank_transaction_mode').val(mode);
+		$('#timebank_modal_title').text(
+			mode === 'request'
+				? '<?php echo esc_js( __( 'Request time', 'timebank' ) ); ?>'
+				: '<?php echo esc_js( __( 'Send time', 'timebank' ) ); ?>'
+		);
+		$('#timebank_user_search_label').text(
+			mode === 'request'
+				? '<?php echo esc_js( __( 'User you request time from', 'timebank' ) ); ?>'
+				: '<?php echo esc_js( __( 'Receiver user', 'timebank' ) ); ?>'
+		);
+
 		$('#timebank_modal').prop('hidden', false);
 		$('body').addClass('timebank-modal-open');
 		$('#timebank_user_search').trigger('focus');
@@ -183,8 +203,8 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		});
 	}
 
-	$('#timebank_open_form').on('click', function() {
-		openTransactionModal();
+	$('.timebank-actions').on('click', '[data-timebank-mode]', function() {
+		openTransactionModal($(this).data('timebank-mode'));
 	});
 
 	$('#timebank_close_form').on('click', function() {
@@ -246,6 +266,44 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		$('#timebank_receiver_id').val($(this).data('user-id'));
 		$('#timebank_user_search').val($(this).data('user-label'));
 		$('#timebank_found_users').prop('hidden', true).empty();
+	});
+
+	$('#timebank_front').on('click', '[data-transaction-action]', function() {
+		var button = $(this);
+		var action = button.data('transaction-action');
+		var transactionId = button.data('transaction-id');
+		$('#timebank_action_message')
+			.removeClass('is-error is-success')
+			.text('<?php echo esc_js( __( 'Updating transaction...', 'timebank' ) ); ?>');
+		button.closest('.timebank-row-actions').find('button').prop('disabled', true);
+
+		$.ajax({
+			url: restBase + '/transaction_action',
+			type: 'POST',
+			data: {
+				transaction_id: transactionId,
+				transaction_action: action
+			},
+			beforeSend: apiHeaders,
+			cache: false,
+			success: function(response) {
+				$('#timebank_action_message')
+					.removeClass('is-error')
+					.addClass('is-success')
+					.text(response.message);
+				loadTransactions();
+			},
+			error: function(xhr) {
+				var message = xhr.responseJSON && xhr.responseJSON.message
+					? xhr.responseJSON.message
+					: '<?php echo esc_js( __( 'The transaction could not be updated.', 'timebank' ) ); ?>';
+				$('#timebank_action_message')
+					.removeClass('is-success')
+					.addClass('is-error')
+					.text(message);
+				button.closest('.timebank-row-actions').find('button').prop('disabled', false);
+			}
+		});
 	});
 
 	$('.timebank-rating').on('click', '.timebank-rating__star', function() {

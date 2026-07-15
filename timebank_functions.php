@@ -36,6 +36,42 @@ function isUserTimeReceiver($receiverId){
   if ($userId == $receiverId) return true;
 }
 
+function timebank_get_transaction_status( $post_id ) {
+  $status = get_post_meta( $post_id, '_timebank_status', true );
+
+  return $status ? $status : 'completed';
+}
+
+function timebank_is_transaction_completed( $post_id ) {
+  return 'completed' === timebank_get_transaction_status( $post_id );
+}
+
+function timebank_get_user_transaction_ids( $user_id ) {
+  return get_posts(
+    array(
+      'post_type'      => 'tbank-transaction',
+      'post_status'    => 'publish',
+      'posts_per_page' => -1,
+      'fields'         => 'ids',
+      'orderby'        => 'date',
+      'order'          => 'ASC',
+      'meta_query'     => array(
+        'relation' => 'OR',
+        array(
+          'key'     => '_timebank_payer',
+          'value'   => $user_id,
+          'compare' => '=',
+        ),
+        array(
+          'key'     => '_timebank_receiver',
+          'value'   => $user_id,
+          'compare' => '=',
+        ),
+      ),
+    )
+  );
+}
+
 function timebank_get_config_value( $key, $default = null ) {
   if ( function_exists( 'timebank_get_configuration' ) ) {
     $config = timebank_get_configuration();
@@ -64,36 +100,87 @@ function timebank_get_user_limits( $user_id ) {
 }
 
 function timebank_get_user_balance( $user_id ) {
-  $posts   = get_posts(
-    array(
-      'post_type'      => 'tbank-transaction',
-      'post_status'    => 'publish',
-      'posts_per_page' => -1,
-      'fields'         => 'ids',
-      'meta_query'     => array(
-        'relation' => 'OR',
-        array(
-          'key'     => '_timebank_payer',
-          'value'   => $user_id,
-          'compare' => '=',
-        ),
-        array(
-          'key'     => '_timebank_receiver',
-          'value'   => $user_id,
-          'compare' => '=',
-        ),
-      ),
-    )
-  );
+  $posts   = timebank_get_user_transaction_ids( $user_id );
   $balance = timebank_get_starting_amount();
 
   foreach ( $posts as $post_id ) {
+    if ( ! timebank_is_transaction_completed( $post_id ) ) {
+      continue;
+    }
+
     $amount   = (int) get_post_meta( $post_id, '_timebank_amount', true );
     $receiver = (int) get_post_meta( $post_id, '_timebank_receiver', true );
     $balance += ( $receiver === (int) $user_id ) ? $amount : -$amount;
   }
 
   return $balance;
+}
+
+function timebank_get_completed_transaction_count( $user_id ) {
+  $count = 0;
+
+  foreach ( timebank_get_user_transaction_ids( $user_id ) as $post_id ) {
+    if ( timebank_is_transaction_completed( $post_id ) ) {
+      $count++;
+    }
+  }
+
+  return $count;
+}
+
+function timebank_get_pending_transaction_count( $user_id, $direction = 'all' ) {
+  $count = 0;
+
+  foreach ( timebank_get_user_transaction_ids( $user_id ) as $post_id ) {
+    if ( 'pending' !== timebank_get_transaction_status( $post_id ) ) {
+      continue;
+    }
+
+    $approver_id = (int) get_post_meta( $post_id, '_timebank_approver', true );
+    $creator_id  = (int) get_post_meta( $post_id, '_timebank_creator', true );
+
+    if ( 'incoming' === $direction && $approver_id !== (int) $user_id ) {
+      continue;
+    }
+
+    if ( 'outgoing' === $direction && $creator_id !== (int) $user_id ) {
+      continue;
+    }
+
+    $count++;
+  }
+
+  return $count;
+}
+
+function timebank_get_balance_history( $user_id, $limit = 10 ) {
+  $history = array();
+  $balance = timebank_get_starting_amount();
+
+  foreach ( timebank_get_user_transaction_ids( $user_id ) as $post_id ) {
+    if ( ! timebank_is_transaction_completed( $post_id ) ) {
+      continue;
+    }
+
+    $amount   = (int) get_post_meta( $post_id, '_timebank_amount', true );
+    $receiver = (int) get_post_meta( $post_id, '_timebank_receiver', true );
+    $delta    = ( $receiver === (int) $user_id ) ? $amount : -$amount;
+    $balance += $delta;
+
+    $history[] = array(
+      'post_id'  => $post_id,
+      'date'     => get_the_date( 'j/m/Y', $post_id ),
+      'title'    => get_the_title( $post_id ),
+      'delta'    => $delta,
+      'balance'  => $balance,
+      'payer'    => (int) get_post_meta( $post_id, '_timebank_payer', true ),
+      'receiver' => $receiver,
+    );
+  }
+
+  $history = array_reverse( $history );
+
+  return $limit > 0 ? array_slice( $history, 0, $limit ) : $history;
 }
 
 function timebank_get_user_limit_bounds( $user_id ) {

@@ -69,6 +69,7 @@
 
 .timebank-actions {
 	display: flex;
+	gap: 10px;
 	justify-content: flex-end;
 	margin: 14px 0;
 }
@@ -315,6 +316,36 @@ body.timebank-modal-open {
 	color: var(--tb-success);
 }
 
+.timebank-dashboard {
+	display: grid;
+	gap: 12px;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	margin: 0 0 16px;
+}
+
+.timebank-stat {
+	background: var(--tb-panel);
+	border: 1px solid var(--tb-border);
+	border-radius: 8px;
+	padding: 14px;
+}
+
+.timebank-stat span {
+	color: var(--tb-muted);
+	display: block;
+	font-size: 12px;
+	font-weight: 800;
+	text-transform: uppercase;
+}
+
+.timebank-stat strong {
+	color: var(--tb-ink);
+	display: block;
+	font-size: 24px;
+	line-height: 1.2;
+	margin-top: 4px;
+}
+
 .timebank-table {
 	overflow: hidden;
 }
@@ -323,7 +354,7 @@ body.timebank-modal-open {
 	align-items: center;
 	display: grid;
 	gap: 12px;
-	grid-template-columns: 96px 1fr 1.4fr 110px 86px 1.5fr;
+	grid-template-columns: 86px 1fr 82px minmax(130px, 1.25fr) 108px 118px 108px 140px;
 	padding: 13px 16px;
 }
 
@@ -357,6 +388,12 @@ body.timebank-modal-open {
 	color: var(--tb-danger);
 }
 
+.timebank-balance-after {
+	color: var(--tb-ink);
+	font-weight: 800;
+	white-space: nowrap;
+}
+
 .timebank-user-link {
 	color: var(--tb-primary-dark);
 	font-weight: 700;
@@ -366,6 +403,67 @@ body.timebank-modal-open {
 .timebank-user-link:hover,
 .timebank-user-link:focus {
 	text-decoration: underline;
+}
+
+.timebank-status {
+	border-radius: 999px;
+	display: inline-block;
+	font-size: 12px;
+	font-weight: 800;
+	padding: 3px 9px;
+	text-transform: uppercase;
+}
+
+.timebank-status--pending {
+	background: #fff4d6;
+	color: #9a6700;
+}
+
+.timebank-status--completed {
+	background: #dcfae6;
+	color: var(--tb-success);
+}
+
+.timebank-status--rejected {
+	background: #fee4e2;
+	color: var(--tb-danger);
+}
+
+.timebank-row-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.timebank-mini-button {
+	border: 1px solid var(--tb-border);
+	border-radius: 6px;
+	cursor: pointer;
+	font: inherit;
+	font-size: 13px;
+	font-weight: 800;
+	min-height: 32px;
+	padding: 5px 9px;
+}
+
+.timebank-mini-button.is-confirm {
+	background: var(--tb-primary);
+	border-color: var(--tb-primary);
+	color: #fff;
+}
+
+.timebank-mini-button.is-reject {
+	background: #fff;
+	border-color: #f0b8b3;
+	color: var(--tb-danger);
+}
+
+.timebank-mini-button:disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.timebank-muted {
+	color: var(--tb-muted);
 }
 
 .timebank-empty,
@@ -463,8 +561,17 @@ body.timebank-modal-open {
 		justify-content: stretch;
 	}
 
+	.timebank-actions,
+	.timebank-row-actions {
+		flex-direction: column;
+	}
+
 	.timebank-button {
 		width: 100%;
+	}
+
+	.timebank-dashboard {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.timebank-form {
@@ -492,4 +599,5 @@ body.timebank-modal-open {
 		content: attr(data-label);
 		font-weight: 700;
 	}
+
 }
