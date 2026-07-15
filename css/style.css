@@ -347,6 +347,17 @@ body.timebank-modal-open {
 	color: var(--tb-danger);
 }
 
+.timebank-user-link {
+	color: var(--tb-primary-dark);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.timebank-user-link:hover,
+.timebank-user-link:focus {
+	text-decoration: underline;
+}
+
 .timebank-empty,
 .timebank-loading,
 .timebank-app--notice {

@@ -8,6 +8,18 @@ function getUserNameById($id){
   return isset( $users[0] ) ? $users[0]->user_login : __( '(deleted user)', 'timebank' );
 }
 
+function timebank_get_user_profile_url( $user_id ) {
+  if ( function_exists( 'bp_members_get_user_url' ) ) {
+    return bp_members_get_user_url( $user_id );
+  }
+
+  if ( function_exists( 'bp_core_get_user_domain' ) ) {
+    return bp_core_get_user_domain( $user_id );
+  }
+
+  return get_author_posts_url( $user_id );
+}
+
 function printStars($number){
     $number = max( 0, min( 5, (int) $number ) );
     $count = 1;

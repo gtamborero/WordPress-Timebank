@@ -37,6 +37,8 @@ if ( ! class_exists( 'TimebankAPI' ) ) {
 					$comment = get_post_meta( $post->ID, '_timebank_comment', true );
 					$is_receiver = ( $receiver === $user_id );
 					$other_user_id = $is_receiver ? $payer : $receiver;
+					$other_user_name = getUserNameById( $other_user_id );
+					$other_user_url = timebank_get_user_profile_url( $other_user_id );
 					$amount_label = ( $is_receiver ? '+' : '-' ) . $amount . ' ' . $currency;
 					?>
 					<div class="timebank-table__row" role="row">
@@ -44,7 +46,9 @@ if ( ! class_exists( 'TimebankAPI' ) ) {
 							<?php echo esc_html( get_the_date( 'j/m/Y', $post ) ); ?>
 						</div>
 						<div role="cell" data-label="<?php esc_attr_e( 'User', 'timebank' ); ?>">
-							<?php echo esc_html( getUserNameById( $other_user_id ) ); ?>
+							<a class="timebank-user-link" href="<?php echo esc_url( $other_user_url ); ?>">
+								<?php echo esc_html( $other_user_name ); ?>
+							</a>
 						</div>
 						<div role="cell" data-label="<?php esc_attr_e( 'Description', 'timebank' ); ?>">
 							<?php echo esc_html( get_the_title( $post ) ); ?>
