@@ -8,13 +8,7 @@ if ( ! class_exists( 'TimebankAPI' ) ) {
 			$user_id = get_current_user_id();
 			$currency = self::getCurrency();
 			$posts = self::getUserTransactions( $user_id, -1 );
-			$balance = 0;
-
-			foreach ( $posts as $post ) {
-				$amount = (int) get_post_meta( $post->ID, '_timebank_amount', true );
-				$receiver = (int) get_post_meta( $post->ID, '_timebank_receiver', true );
-				$balance += ( $receiver === $user_id ) ? $amount : -$amount;
-			}
+			$balance = timebank_get_user_balance( $user_id );
 
 			$visible_posts = array_slice( $posts, 0, 50 );
 
@@ -104,6 +98,42 @@ if ( ! class_exists( 'TimebankAPI' ) ) {
 
 			if ( $amount <= 0 ) {
 				return new WP_Error( 'timebank_invalid_amount', __( 'Amount must be greater than zero.', 'timebank' ), array( 'status' => 400 ) );
+			}
+
+			$payer_balance        = timebank_get_user_balance( $payer_id );
+			$receiver_balance     = timebank_get_user_balance( $receiver_id );
+			$payer_balance_after  = $payer_balance - $amount;
+			$receiver_balance_after = $receiver_balance + $amount;
+			$payer_bounds         = timebank_get_user_limit_bounds( $payer_id );
+			$receiver_bounds      = timebank_get_user_limit_bounds( $receiver_id );
+			$currency             = self::getCurrency();
+
+			if ( ! timebank_is_balance_within_limits( $payer_id, $payer_balance_after ) ) {
+				return new WP_Error(
+					'timebank_payer_limit_reached',
+					sprintf(
+						/* translators: 1: balance after transaction, 2: minimum allowed, 3: currency */
+						__( 'This transaction would leave your balance at %1$s, below your minimum allowed balance of %2$s %3$s.', 'timebank' ),
+						$payer_balance_after . ' ' . $currency,
+						$payer_bounds['min_balance'],
+						$currency
+					),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( ! timebank_is_balance_within_limits( $receiver_id, $receiver_balance_after ) ) {
+				return new WP_Error(
+					'timebank_receiver_limit_reached',
+					sprintf(
+						/* translators: 1: balance after transaction, 2: maximum allowed, 3: currency */
+						__( 'This transaction would leave the receiver at %1$s, above the maximum allowed balance of %2$s %3$s.', 'timebank' ),
+						$receiver_balance_after . ' ' . $currency,
+						$receiver_bounds['max_balance'],
+						$currency
+					),
+					array( 'status' => 400 )
+				);
 			}
 
 			$rating = max( 1, min( 5, $rating ? $rating : 5 ) );

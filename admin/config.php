@@ -210,6 +210,67 @@ function tbank_save_postdata( $post_id ) {
 }
 add_action( 'save_post', 'tbank_save_postdata' );
 
+function timebank_user_limits_fields( $user ) {
+    $limits   = timebank_get_user_limits( $user->ID );
+    $currency = timebank_get_config_value( 'currency', 'minutes' );
+    ?>
+    <h2><?php esc_html_e( 'TimeBank Limits', 'timebank' ); ?></h2>
+    <table class="form-table" role="presentation">
+        <tr>
+            <th><label for="timebank_min_limit"><?php esc_html_e( 'Minimum balance limit', 'timebank' ); ?></label></th>
+            <td>
+                <input
+                    type="number"
+                    name="timebank_min_limit"
+                    id="timebank_min_limit"
+                    value="<?php echo esc_attr( $limits['min_limit'] ); ?>"
+                    class="regular-text"
+                    step="1"
+                />
+                <p class="description"><?php echo esc_html( sprintf( __( 'Lowest balance allowed for this user. It is applied as -%1$s %2$s.', 'timebank' ), abs( (int) $limits['min_limit'] ), $currency ) ); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="timebank_max_limit"><?php esc_html_e( 'Maximum balance limit', 'timebank' ); ?></label></th>
+            <td>
+                <input
+                    type="number"
+                    name="timebank_max_limit"
+                    id="timebank_max_limit"
+                    value="<?php echo esc_attr( $limits['max_limit'] ); ?>"
+                    class="regular-text"
+                    step="1"
+                />
+                <p class="description"><?php echo esc_html( sprintf( __( 'Highest balance allowed for this user in %s.', 'timebank' ), $currency ) ); ?></p>
+                <?php wp_nonce_field( 'timebank_save_user_limits', 'timebank_user_limits_nonce' ); ?>
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+add_action( 'show_user_profile', 'timebank_user_limits_fields' );
+add_action( 'edit_user_profile', 'timebank_user_limits_fields' );
+
+function timebank_save_user_limits( $user_id ) {
+    if ( ! current_user_can( 'edit_user', $user_id ) ) {
+        return;
+    }
+
+    if ( ! isset( $_POST['timebank_user_limits_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['timebank_user_limits_nonce'] ) ), 'timebank_save_user_limits' ) ) {
+        return;
+    }
+
+    if ( isset( $_POST['timebank_min_limit'] ) ) {
+        update_user_meta( $user_id, '_timebank_min_limit', absint( $_POST['timebank_min_limit'] ) );
+    }
+
+    if ( isset( $_POST['timebank_max_limit'] ) ) {
+        update_user_meta( $user_id, '_timebank_max_limit', absint( $_POST['timebank_max_limit'] ) );
+    }
+}
+add_action( 'personal_options_update', 'timebank_save_user_limits' );
+add_action( 'edit_user_profile_update', 'timebank_save_user_limits' );
+
 
 // ADD COLUMN ON ADMIN LIST VIEW OF TRANSACTIONS POST TYPE
 function tbank_add_admin_column( $column_title, $post_type, $cb, $order_by = false, $order_by_field_is_meta = false ){

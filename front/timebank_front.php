@@ -62,10 +62,23 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 				<input name="amount" type="number" min="1" step="1" required>
 			</label>
 
-			<label class="timebank-field">
+			<div class="timebank-field">
 				<span><?php esc_html_e( 'Rating', 'timebank' ); ?></span>
-				<input name="rate" type="number" min="1" max="5" step="1" value="5">
-			</label>
+				<div class="timebank-rating" role="radiogroup" aria-label="<?php esc_attr_e( 'Rating', 'timebank' ); ?>">
+					<input id="timebank_rating_value" name="rate" type="hidden" value="5">
+					<?php for ( $star = 1; $star <= 5; $star++ ) : ?>
+						<button
+							type="button"
+							class="timebank-rating__star is-active"
+							data-rating="<?php echo esc_attr( $star ); ?>"
+							role="radio"
+							aria-checked="<?php echo 5 === $star ? 'true' : 'false'; ?>"
+							aria-label="<?php echo esc_attr( sprintf( __( '%d stars', 'timebank' ), $star ) ); ?>"
+						>&#9733;</button>
+					<?php endfor; ?>
+					<span id="timebank_rating_label" class="timebank-rating__label"><?php esc_html_e( 'Excellent', 'timebank' ); ?></span>
+				</div>
+			</div>
 
 			<label class="timebank-field timebank-field--wide">
 				<span><?php esc_html_e( 'Comment', 'timebank' ); ?></span>
@@ -107,8 +120,31 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 	function resetForm() {
 		$('#timebank_payment').trigger('reset');
 		$('#timebank_receiver_id').val('');
+		setRating(5);
 		$('#timebank_found_users').prop('hidden', true).empty();
 		showMessage('');
+	}
+
+	function setRating(rating) {
+		var labels = {
+			1: '<?php echo esc_js( __( 'Too bad', 'timebank' ) ); ?>',
+			2: '<?php echo esc_js( __( 'Bad', 'timebank' ) ); ?>',
+			3: '<?php echo esc_js( __( 'Normal', 'timebank' ) ); ?>',
+			4: '<?php echo esc_js( __( 'Good', 'timebank' ) ); ?>',
+			5: '<?php echo esc_js( __( 'Excellent', 'timebank' ) ); ?>'
+		};
+
+		rating = Math.max(1, Math.min(5, parseInt(rating, 10) || 5));
+		$('#timebank_rating_value').val(rating);
+		$('#timebank_rating_label').text(labels[rating]);
+
+		$('.timebank-rating__star').each(function() {
+			var starValue = parseInt($(this).data('rating'), 10);
+			var isActive = starValue <= rating;
+			$(this)
+				.toggleClass('is-active', isActive)
+				.attr('aria-checked', starValue === rating ? 'true' : 'false');
+		});
 	}
 
 	function openTransactionModal() {
@@ -205,6 +241,26 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		$('#timebank_receiver_id').val($(this).data('user-id'));
 		$('#timebank_user_search').val($(this).data('user-label'));
 		$('#timebank_found_users').prop('hidden', true).empty();
+	});
+
+	$('.timebank-rating').on('click', '.timebank-rating__star', function() {
+		setRating($(this).data('rating'));
+	});
+
+	$('.timebank-rating').on('keydown', '.timebank-rating__star', function(event) {
+		var current = parseInt($('#timebank_rating_value').val(), 10) || 5;
+
+		if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+			event.preventDefault();
+			setRating(current - 1);
+			$('.timebank-rating__star[data-rating="' + $('#timebank_rating_value').val() + '"]').trigger('focus');
+		}
+
+		if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			setRating(current + 1);
+			$('.timebank-rating__star[data-rating="' + $('#timebank_rating_value').val() + '"]').trigger('focus');
+		}
 	});
 
 	$('#timebank_payment').on('submit', function(event) {

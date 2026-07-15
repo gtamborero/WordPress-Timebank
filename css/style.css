@@ -215,6 +215,48 @@ body.timebank-modal-open {
 	resize: vertical;
 }
 
+.timebank-rating {
+	align-items: center;
+	display: inline-flex;
+	gap: 4px;
+	min-height: 42px;
+}
+
+.timebank-rating__star {
+	background: transparent;
+	border: 0;
+	color: #c6cbd1;
+	cursor: pointer;
+	font-size: 30px;
+	line-height: 1;
+	padding: 2px;
+	transition: color 120ms ease, transform 120ms ease;
+}
+
+.timebank-rating__star.is-active {
+	color: #d99a00;
+}
+
+.timebank-rating__star:hover,
+.timebank-rating__star:focus {
+	color: #d99a00;
+	outline: none;
+	transform: translateY(-1px);
+}
+
+.timebank-rating__star:focus-visible {
+	border-radius: 4px;
+	box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.28);
+}
+
+.timebank-rating__label {
+	color: var(--tb-muted);
+	font-size: 14px;
+	font-weight: 800;
+	margin-left: 10px;
+	min-width: 72px;
+}
+
 .timebank-user-results {
 	background: #ffffff;
 	border: 1px solid var(--tb-border);
