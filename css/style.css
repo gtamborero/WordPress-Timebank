@@ -222,29 +222,39 @@ body.timebank-modal-open {
 	min-height: 42px;
 }
 
-.timebank-rating__star {
+.timebank-rating button.timebank-rating__star {
+	-webkit-appearance: none;
+	appearance: none;
 	background: transparent;
+	background-color: transparent !important;
 	border: 0;
-	color: #c6cbd1;
+	box-shadow: none;
+	color: #bcc3ca !important;
 	cursor: pointer;
 	font-size: 30px;
+	height: auto;
 	line-height: 1;
+	margin: 0;
+	min-height: 0;
+	min-width: 0;
+	outline: none;
 	padding: 2px;
+	text-shadow: none;
 	transition: color 120ms ease, transform 120ms ease;
+	width: auto;
 }
 
-.timebank-rating__star.is-active {
-	color: #d99a00;
+.timebank-rating button.timebank-rating__star.is-active {
+	color: #d9a100 !important;
 }
 
-.timebank-rating__star:hover,
-.timebank-rating__star:focus {
-	color: #d99a00;
+.timebank-rating button.timebank-rating__star:hover,
+.timebank-rating button.timebank-rating__star:focus {
 	outline: none;
 	transform: translateY(-1px);
 }
 
-.timebank-rating__star:focus-visible {
+.timebank-rating button.timebank-rating__star:focus-visible {
 	border-radius: 4px;
 	box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.28);
 }

@@ -125,6 +125,18 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		showMessage('');
 	}
 
+	function paintRating(rating) {
+		rating = Math.max(1, Math.min(5, parseInt(rating, 10) || 5));
+
+		$('.timebank-rating__star').each(function() {
+			var starValue = parseInt($(this).data('rating'), 10);
+			var isActive = starValue <= rating;
+			$(this)
+				.toggleClass('is-active', isActive)
+				.attr('aria-checked', starValue === rating ? 'true' : 'false');
+		});
+	}
+
 	function setRating(rating) {
 		var labels = {
 			1: '<?php echo esc_js( __( 'Too bad', 'timebank' ) ); ?>',
@@ -137,14 +149,7 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		rating = Math.max(1, Math.min(5, parseInt(rating, 10) || 5));
 		$('#timebank_rating_value').val(rating);
 		$('#timebank_rating_label').text(labels[rating]);
-
-		$('.timebank-rating__star').each(function() {
-			var starValue = parseInt($(this).data('rating'), 10);
-			var isActive = starValue <= rating;
-			$(this)
-				.toggleClass('is-active', isActive)
-				.attr('aria-checked', starValue === rating ? 'true' : 'false');
-		});
+		paintRating(rating);
 	}
 
 	function openTransactionModal() {
@@ -245,6 +250,20 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 
 	$('.timebank-rating').on('click', '.timebank-rating__star', function() {
 		setRating($(this).data('rating'));
+	});
+
+	$('.timebank-rating').on('mouseenter focus', '.timebank-rating__star', function() {
+		paintRating($(this).data('rating'));
+	});
+
+	$('.timebank-rating').on('mouseleave', function() {
+		paintRating($('#timebank_rating_value').val());
+	});
+
+	$('.timebank-rating').on('focusout', function(event) {
+		if (!$(this).find(event.relatedTarget).length) {
+			paintRating($('#timebank_rating_value').val());
+		}
 	});
 
 	$('.timebank-rating').on('keydown', '.timebank-rating__star', function(event) {
