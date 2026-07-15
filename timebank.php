@@ -68,7 +68,13 @@ file_put_contents(plugin_dir_path( __FILE__ ). 'log_error_activation_timebank.tx
 
 // Include timebank_front.php view if user is not in backend and not in REST Request (Solving ajax error no save)
 function timebank_front_view(){
-  if(!(is_admin() || defined('REST_REQUEST'))){ include_once "front/timebank_front.php"; }
+  if ( is_admin() || defined( 'REST_REQUEST' ) ) {
+    return '';
+  }
+
+  ob_start();
+  include plugin_dir_path( __FILE__ ) . 'front/timebank_front.php';
+  return ob_get_clean();
 }
 
 //CSS STYLE FOR PUBLIC
@@ -76,6 +82,7 @@ add_action( 'wp_enqueue_scripts', 'timebank_stylesheet' );
 function timebank_stylesheet(){
     wp_register_style( 'timebank-style', plugins_url('css/style.css', __FILE__) );
     wp_enqueue_style( 'timebank-style' );
+    wp_enqueue_script( 'jquery' );
 }
 
 //include_once "admin/tbank_widget.php";

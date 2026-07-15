@@ -5,10 +5,11 @@ function getUserNameById($id){
     'fields'  => [ 'user_login', 'user_email' ],
   ];
   $users = get_users( $args );
-  return $users[0]->user_login;
+  return isset( $users[0] ) ? $users[0]->user_login : __( '(deleted user)', 'timebank' );
 }
 
 function printStars($number){
+    $number = max( 0, min( 5, (int) $number ) );
     $count = 1;
     $stars = "";
 	while($count <= $number){

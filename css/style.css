@@ -1,31 +1,326 @@
-/* TRANSACTION VIEW */
-.timebank-grid{
-display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:10px; gap:15px; 
-}
-.timebank-grid > div:nth-child(8) { display: none; }
-
-/* Mobile grid design */
-@media (max-width:990px){
-    .timebank-grid{
-        grid-template-columns:1fr 70px 40px; padding:10px; gap:15px; 
-    }
-    .timebank-grid > div:nth-child(1){ display:none; }
-    .timebank-grid > div:nth-child(2){ display:none; }
-    .timebank-grid > div:nth-child(5) { display: none; }
-    .timebank-grid > div:nth-child(6) { display: none; }
-    .timebank-grid > div:nth-child(7) { display: none; }
-    .timebank-grid > div:nth-child(8) { display: block; }
+.timebank-app {
+	--tb-ink: #17202a;
+	--tb-muted: #667085;
+	--tb-border: #d9e0e7;
+	--tb-soft: #f4f7f8;
+	--tb-panel: #ffffff;
+	--tb-primary: #0f766e;
+	--tb-primary-dark: #115e59;
+	--tb-danger: #b42318;
+	--tb-success: #067647;
+	color: var(--tb-ink);
+	font-size: 16px;
+	line-height: 1.45;
+	margin: 24px 0;
 }
 
-/* TIMEBANK NEW PAYMENT VIEW */
-#timebank_payment{
-    grid-template-columns: repeat(3, 1fr);
+.timebank-app *,
+.timebank-app *::before,
+.timebank-app *::after {
+	box-sizing: border-box;
 }
-#timebank_payment > div{
-    padding:5px;
+
+.timebank-app--notice,
+.timebank-summary,
+.timebank-form,
+.timebank-table,
+.timebank-empty,
+.timebank-loading {
+	background: var(--tb-panel);
+	border: 1px solid var(--tb-border);
+	border-radius: 8px;
 }
-@media (max-width:990px){
-    #timebank_payment{
-        grid-template-columns: 1fr; 
-    }
+
+.timebank-summary {
+	align-items: center;
+	display: flex;
+	gap: 18px;
+	justify-content: space-between;
+	padding: 18px;
+}
+
+.timebank-eyebrow,
+.timebank-balance span {
+	color: var(--tb-muted);
+	display: block;
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.timebank-summary h2 {
+	font-size: 24px;
+	line-height: 1.2;
+	margin: 4px 0 0;
+}
+
+.timebank-balance {
+	min-width: 150px;
+	text-align: right;
+}
+
+.timebank-balance strong {
+	color: var(--tb-primary-dark);
+	display: block;
+	font-size: 24px;
+	line-height: 1.2;
+	margin-top: 4px;
+}
+
+.timebank-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin: 14px 0;
+}
+
+.timebank-button,
+.timebank-icon-button,
+.timebank-user-result {
+	cursor: pointer;
+	font: inherit;
+}
+
+.timebank-button {
+	align-items: center;
+	border: 1px solid var(--tb-border);
+	border-radius: 6px;
+	display: inline-flex;
+	font-weight: 700;
+	justify-content: center;
+	min-height: 42px;
+	padding: 9px 16px;
+}
+
+.timebank-button--primary {
+	background: var(--tb-primary);
+	border-color: var(--tb-primary);
+	color: #ffffff;
+}
+
+.timebank-button--primary:hover,
+.timebank-button--primary:focus {
+	background: var(--tb-primary-dark);
+	border-color: var(--tb-primary-dark);
+	color: #ffffff;
+}
+
+.timebank-button:disabled {
+	cursor: not-allowed;
+	opacity: 0.65;
+}
+
+.timebank-form {
+	display: grid;
+	gap: 14px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	margin-bottom: 18px;
+	padding: 18px;
+}
+
+.timebank-form[hidden] {
+	display: none;
+}
+
+.timebank-form__header,
+.timebank-form__footer,
+.timebank-field--wide {
+	grid-column: 1 / -1;
+}
+
+.timebank-form__header,
+.timebank-form__footer {
+	align-items: center;
+	display: flex;
+	gap: 12px;
+	justify-content: space-between;
+}
+
+.timebank-form h3 {
+	font-size: 20px;
+	margin: 0;
+}
+
+.timebank-icon-button {
+	background: var(--tb-soft);
+	border: 1px solid var(--tb-border);
+	border-radius: 6px;
+	color: var(--tb-muted);
+	font-size: 24px;
+	height: 36px;
+	line-height: 1;
+	width: 36px;
+}
+
+.timebank-field {
+	display: block;
+	position: relative;
+}
+
+.timebank-field span {
+	color: var(--tb-muted);
+	display: block;
+	font-size: 14px;
+	font-weight: 700;
+	margin-bottom: 6px;
+}
+
+.timebank-field input,
+.timebank-field textarea {
+	background: #ffffff;
+	border: 1px solid var(--tb-border);
+	border-radius: 6px;
+	color: var(--tb-ink);
+	font: inherit;
+	min-height: 42px;
+	padding: 9px 11px;
+	width: 100%;
+}
+
+.timebank-field textarea {
+	resize: vertical;
+}
+
+.timebank-user-results {
+	background: #ffffff;
+	border: 1px solid var(--tb-border);
+	border-radius: 6px;
+	box-shadow: 0 12px 30px rgba(23, 32, 42, 0.14);
+	left: 0;
+	margin-top: 6px;
+	max-height: 220px;
+	overflow: auto;
+	position: absolute;
+	right: 0;
+	z-index: 20;
+}
+
+.timebank-user-result {
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid var(--tb-border);
+	color: var(--tb-ink);
+	display: block;
+	padding: 10px 12px;
+	text-align: left;
+	width: 100%;
+}
+
+.timebank-user-result:hover,
+.timebank-user-result:focus {
+	background: var(--tb-soft);
+}
+
+.timebank-user-results__empty {
+	color: var(--tb-muted);
+	padding: 10px 12px;
+}
+
+.timebank-message {
+	color: var(--tb-muted);
+	margin: 0;
+}
+
+.timebank-message.is-error {
+	color: var(--tb-danger);
+}
+
+.timebank-message.is-success {
+	color: var(--tb-success);
+}
+
+.timebank-table {
+	overflow: hidden;
+}
+
+.timebank-table__row {
+	align-items: center;
+	display: grid;
+	gap: 12px;
+	grid-template-columns: 96px 1fr 1.4fr 110px 86px 1.5fr;
+	padding: 13px 16px;
+}
+
+.timebank-table__row + .timebank-table__row {
+	border-top: 1px solid var(--tb-border);
+}
+
+.timebank-table__row--head {
+	background: var(--tb-soft);
+	color: var(--tb-muted);
+	font-size: 13px;
+	font-weight: 800;
+	text-transform: uppercase;
+}
+
+.timebank-amount {
+	border-radius: 999px;
+	display: inline-block;
+	font-weight: 800;
+	padding: 3px 9px;
+	white-space: nowrap;
+}
+
+.timebank-amount.is-positive {
+	background: #dcfae6;
+	color: var(--tb-success);
+}
+
+.timebank-amount.is-negative {
+	background: #fee4e2;
+	color: var(--tb-danger);
+}
+
+.timebank-empty,
+.timebank-loading,
+.timebank-app--notice {
+	color: var(--tb-muted);
+	padding: 18px;
+	text-align: center;
+}
+
+@media (max-width: 820px) {
+	.timebank-summary,
+	.timebank-form__footer {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.timebank-balance {
+		text-align: left;
+	}
+
+	.timebank-actions,
+	.timebank-form__footer {
+		justify-content: stretch;
+	}
+
+	.timebank-button {
+		width: 100%;
+	}
+
+	.timebank-form {
+		grid-template-columns: 1fr;
+	}
+
+	.timebank-table__row--head {
+		display: none;
+	}
+
+	.timebank-table__row {
+		display: block;
+		padding: 14px 16px;
+	}
+
+	.timebank-table__row > div {
+		display: flex;
+		gap: 12px;
+		justify-content: space-between;
+		padding: 5px 0;
+	}
+
+	.timebank-table__row > div::before {
+		color: var(--tb-muted);
+		content: attr(data-label);
+		font-weight: 700;
+	}
 }

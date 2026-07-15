@@ -1,155 +1,225 @@
-<?php 
-// Main timebank view
-// If no parameters then view is main user transactions
-// If parameter user is set then search transactions of user and add exchange with user button
-// Get user data from transactions posttype
+<?php
+if ( ! is_user_logged_in() ) {
+	?>
+	<div class="timebank-app timebank-app--notice">
+		<p><?php esc_html_e( 'Please log in to view and send TimeBank transactions.', 'timebank' ); ?></p>
+	</div>
+	<?php
+	return;
+}
+
+$current_user = wp_get_current_user();
+$rest_base    = esc_url_raw( rest_url( 'iproject/v1' ) );
+$rest_nonce   = wp_create_nonce( 'wp_rest' );
 ?>
 
-<div style="padding:15px; background-color:#f5f5f5; margin-bottom:10px;">User data, amount, stats...</div>
+<div
+	class="timebank-app"
+	data-rest-base="<?php echo esc_url( $rest_base ); ?>"
+	data-rest-nonce="<?php echo esc_attr( $rest_nonce ); ?>"
+>
+	<section class="timebank-summary" aria-live="polite">
+		<div>
+			<span class="timebank-eyebrow"><?php esc_html_e( 'TimeBank account', 'timebank' ); ?></span>
+			<h2><?php echo esc_html( $current_user->display_name ? $current_user->display_name : $current_user->user_login ); ?></h2>
+		</div>
+		<div class="timebank-balance">
+			<span><?php esc_html_e( 'Balance', 'timebank' ); ?></span>
+			<strong id="timebank_balance">...</strong>
+		</div>
+	</section>
 
-<button onclick="openTransaction();" class="button" style="width:100%; margin-left:auto; display:block;">New Transaction / Search user</button><br>
+	<div class="timebank-actions">
+		<button type="button" class="timebank-button timebank-button--primary" id="timebank_open_form">
+			<?php esc_html_e( 'New transaction', 'timebank' ); ?>
+		</button>
+	</div>
 
-<!-- TIMEBANK PAYMENT CLOSE BUTTON -->
-<button onclick="hideTransaction();" id="timebank_payment_close" style="padding:5px; margin-left:10px; float:right;">X</button>
+	<form id="timebank_payment" class="timebank-form" hidden>
+		<div class="timebank-form__header">
+			<h3><?php esc_html_e( 'Send time', 'timebank' ); ?></h3>
+			<button type="button" class="timebank-icon-button" id="timebank_close_form" aria-label="<?php esc_attr_e( 'Close form', 'timebank' ); ?>">
+				&times;
+			</button>
+		</div>
 
+		<label class="timebank-field timebank-field--wide">
+			<span><?php esc_html_e( 'Receiver user', 'timebank' ); ?></span>
+			<input id="timebank_user_search" type="search" autocomplete="off" placeholder="<?php esc_attr_e( 'Start typing a username...', 'timebank' ); ?>">
+			<input id="timebank_receiver_id" name="receiver_id" type="hidden">
+			<div id="timebank_found_users" class="timebank-user-results" role="listbox" hidden></div>
+		</label>
 
-<!-- TIMEBANK PAYMENT DIV -->
-<!-- no tengo que cargar nada de servidor hasta que no envie transaccion. todo en local y oculto -->
-<form id="payment_data">
-<div id="timebank_payment" style="padding:15px 0; display:grid;">
-        <div>
-            <input name="userId" placeholder="Start writing the user name..." type="text" oninput="searchUser(this.value);"></input>
-        </div>
-        
-        <style>
-            #foundUsers{
-                position: absolute;
-                margin-top:50px;
-                width:500px;
-                height:40px;
-                background-color: #fff;
-                border:1px solid #eee;
-            }
-        </style>
+		<label class="timebank-field timebank-field--wide">
+			<span><?php esc_html_e( 'Description', 'timebank' ); ?></span>
+			<input name="description" type="text" maxlength="120" required>
+		</label>
 
-        <div>
-            Description*: <input name="description" type="text"></input>
-        </div>
-        <div>
-            Amount*: <input name="amount" type="text"></input>
-        </div>
-        <div>
-            Rate: <input name="rate" type="text"></input>
-        </div>
-        <div>
-            Comment: <input name="comment" type="text"></input>
-        </div>
+		<label class="timebank-field">
+			<span><?php esc_html_e( 'Amount', 'timebank' ); ?></span>
+			<input name="amount" type="number" min="1" step="1" required>
+		</label>
 
-        <input type="hidden" name="user-id-creator" value="<?php echo get_current_user_id() ?>">
+		<label class="timebank-field">
+			<span><?php esc_html_e( 'Rating', 'timebank' ); ?></span>
+			<input name="rate" type="number" min="1" max="5" step="1" value="5">
+		</label>
 
-        <button onclick="createNewTransaction();" type="button">SEND TIME</button>
+		<label class="timebank-field timebank-field--wide">
+			<span><?php esc_html_e( 'Comment', 'timebank' ); ?></span>
+			<textarea name="comment" rows="3" maxlength="200"></textarea>
+		</label>
 
-<?php 
-/*$users = get_users();
-// Array of WP_User objects.
-foreach ( $users as $user ) {
-	echo '<span>' . esc_html( $user->display_name ) . '</span><br>';
-}*/
-?>
+		<div class="timebank-form__footer">
+			<p id="timebank_form_message" class="timebank-message" aria-live="polite"></p>
+			<button type="submit" class="timebank-button timebank-button--primary">
+				<?php esc_html_e( 'Send time', 'timebank' ); ?>
+			</button>
+		</div>
+	</form>
 
-</div>
-</form>
-
-<!-- TIMEBANK DATA DIV -->
-<div id="timebank_front">
-    <!-- LOADING -->
-    <div style="padding:15px; text-align:center;">LOADING ...<div>
+	<div id="timebank_front" class="timebank-transactions" aria-live="polite">
+		<div class="timebank-loading"><?php esc_html_e( 'Loading transactions...', 'timebank' ); ?></div>
+	</div>
 </div>
 
 <script>
-// Carga VideoId + UserId
-    //function getTimebank(){
-    jQuery(function(){
-        jQuery.ajax({
-            url: "<?php echo site_url(); ?>/wp-json/iproject/v1/timebank_front",
-            type: "GET",
-            data: { 
-                'userId':<?php echo get_current_user_id() ?>,
-                '_wpnonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>',
-            },
-            contentType: "application/json; charset=utf-8",
-            cache: false,
-            success: function(data){
-                //console.log(data);
-                jQuery('#timebank_front').html(data);
-            },
-            error: function(){
-                console.log("Algo salió mal en la consulta api");
-                jQuery('#timebank_front').html("Algo salió mal en la consulta api");
-            }
-        }); 
-    })
+(function($) {
+	var app = $('.timebank-app').last();
+	var restBase = app.data('rest-base');
+	var restNonce = app.data('rest-nonce');
+	var searchRequest = null;
 
-    function openTransaction(){
-        // Show newTransaction (preloaded) + close button
-        jQuery('#timebank_payment').fadeIn();
-        jQuery('#timebank_payment_close').fadeIn();
-    }
+	function apiHeaders(xhr) {
+		xhr.setRequestHeader('X-WP-Nonce', restNonce);
+	}
 
-    function hideTransaction(){
-        jQuery('#timebank_payment').fadeOut();
-        jQuery('#timebank_payment_close').fadeOut();
-    }
+	function showMessage(message, type) {
+		$('#timebank_form_message')
+			.removeClass('is-error is-success')
+			.addClass(type ? 'is-' + type : '')
+			.text(message || '');
+	}
 
-    function createNewTransaction(){
-        var formData = jQuery('#payment_data').serialize();
-        jQuery.ajax({
-            url: "<?php echo site_url(); ?>/wp-json/iproject/v1/create_new_transaction",
-            type: "POST",
-            data: formData,
-            //ContentType: "application/json; charset=utf-8",
-            cache: false,
-            success: function(data){
-                console.log(data);
-                // No muestro nada del servidor
-                // Le tengo que preguntar 
-                //jQuery('#timebank_payment').html(data);
+	function resetForm() {
+		$('#timebank_payment').trigger('reset');
+		$('#timebank_receiver_id').val('');
+		$('#timebank_found_users').prop('hidden', true).empty();
+		showMessage('');
+	}
 
-            },
-            error: function(){
-                console.log("Algo salió mal en createNewTransaction");
-                jQuery('#timebank_front').html("Algo salió mal en createNewTransaction");
-            }
-        }); 
-    }
+	function loadTransactions() {
+		$('#timebank_front').html('<div class="timebank-loading"><?php echo esc_js( __( 'Loading transactions...', 'timebank' ) ); ?></div>');
 
-    function searchUser(userName){
-        
-        jQuery.ajax({
-            url: "<?php echo site_url(); ?>/wp-json/iproject/v1/search_user",
-            type: "GET",
-            data: { userName: userName },
-            //ContentType: "application/json; charset=utf-8",
-            cache: false,
-            success: function(data){
-                
-                data.forEach((user)=>{
-                    //console.log(user.data.user_login);
-                    jQuery('#foundUsers').html(user.data.user_login);
+		$.ajax({
+			url: restBase + '/timebank_front',
+			type: 'GET',
+			beforeSend: apiHeaders,
+			cache: false,
+			success: function(response) {
+				$('#timebank_front').html(response.html);
+				$('#timebank_balance').text(response.balance_label);
+			},
+			error: function() {
+				$('#timebank_front').html('<div class="timebank-empty"><?php echo esc_js( __( 'Transactions could not be loaded.', 'timebank' ) ); ?></div>');
+				$('#timebank_balance').text('-');
+			}
+		});
+	}
 
-                })
+	$('#timebank_open_form').on('click', function() {
+		$('#timebank_payment').prop('hidden', false);
+		$('#timebank_user_search').trigger('focus');
+	});
 
-                // No muestro nada del servidor
-                // Le tengo que preguntar 
-                //jQuery('#timebank_payment').html(data);
-            },
-            error: function(){
-                console.log("Algo salió mal en createNewTransaction");
-                jQuery('#timebank_front').html("Algo salió mal en createNewTransaction");
-            }
-        }); 
-    }
+	$('#timebank_close_form').on('click', function() {
+		$('#timebank_payment').prop('hidden', true);
+		resetForm();
+	});
+
+	$('#timebank_user_search').on('input', function() {
+		var userName = $(this).val().trim();
+		var results = $('#timebank_found_users');
+
+		$('#timebank_receiver_id').val('');
+		results.prop('hidden', true).empty();
+
+		if (userName.length < 2) {
+			return;
+		}
+
+		if (searchRequest) {
+			searchRequest.abort();
+		}
+
+		searchRequest = $.ajax({
+			url: restBase + '/search_user',
+			type: 'GET',
+			data: { userName: userName },
+			beforeSend: apiHeaders,
+			cache: false,
+			success: function(users) {
+				results.empty();
+
+				if (!users.length) {
+					results.append('<div class="timebank-user-results__empty"><?php echo esc_js( __( 'No users found.', 'timebank' ) ); ?></div>');
+				}
+
+				users.forEach(function(user) {
+					var button = $('<button type="button" class="timebank-user-result"></button>');
+					button.text(user.label);
+					button.data('user-id', user.id);
+					button.data('user-label', user.label);
+					results.append(button);
+				});
+
+				results.prop('hidden', false);
+			}
+		});
+	});
+
+	$('#timebank_found_users').on('click', '.timebank-user-result', function() {
+		$('#timebank_receiver_id').val($(this).data('user-id'));
+		$('#timebank_user_search').val($(this).data('user-label'));
+		$('#timebank_found_users').prop('hidden', true).empty();
+	});
+
+	$('#timebank_payment').on('submit', function(event) {
+		event.preventDefault();
+
+		if (!$('#timebank_receiver_id').val()) {
+			showMessage('<?php echo esc_js( __( 'Select a receiver user from the search results.', 'timebank' ) ); ?>', 'error');
+			return;
+		}
+
+		var submitButton = $(this).find('button[type="submit"]');
+		submitButton.prop('disabled', true);
+		showMessage('<?php echo esc_js( __( 'Sending transaction...', 'timebank' ) ); ?>');
+
+		$.ajax({
+			url: restBase + '/create_new_transaction',
+			type: 'POST',
+			data: $(this).serialize(),
+			beforeSend: apiHeaders,
+			cache: false,
+			success: function(response) {
+				showMessage(response.message, 'success');
+				resetForm();
+				$('#timebank_payment').prop('hidden', true);
+				loadTransactions();
+			},
+			error: function(xhr) {
+				var message = xhr.responseJSON && xhr.responseJSON.message
+					? xhr.responseJSON.message
+					: '<?php echo esc_js( __( 'The transaction could not be created.', 'timebank' ) ); ?>';
+				showMessage(message, 'error');
+			},
+			complete: function() {
+				submitButton.prop('disabled', false);
+			}
+		});
+	});
+
+	loadTransactions();
+})(jQuery);
 </script>
-
-
-

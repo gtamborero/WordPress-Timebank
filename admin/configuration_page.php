@@ -3,6 +3,24 @@
 	<br /><p style="font-size:20px;"><strong><?php _e('TIME-BANK GENERAL CONFIGURATION','timebank'); ?></strong></p><hr>
 	<?php echo $timebank_notice; ?>
 
+	<div class="timebank-shortcodes">
+		<p class="timebank-section-title"><strong><?php esc_html_e( 'Available shortcode', 'timebank' ); ?></strong></p>
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Shortcode', 'timebank' ); ?></th>
+					<th><?php esc_html_e( 'Description', 'timebank' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><code>[timebank_view]</code></td>
+					<td><?php esc_html_e( 'Displays the TimeBank front-end view, including the transfer form and the current user transaction list.', 'timebank' ); ?></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
 	<form action="" method="post">
 	<?php wp_nonce_field( 'timebank_save_configuration' ); ?>
 	<input name="page" type="hidden" value="timebank_options" />
@@ -76,4 +94,6 @@ The $siteUrl Team.</pre>
 
 .timebank .button { font-size:14px; }
 .timebank .button a { font-weight:bold; text-decoration:none;  }
+.timebank-shortcodes { margin: 0 0 18px; max-width: 980px; }
+.timebank-section-title { margin: 0 0 8px; }
 </style>
