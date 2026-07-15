@@ -35,48 +35,51 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		</button>
 	</div>
 
-	<form id="timebank_payment" class="timebank-form" hidden>
-		<div class="timebank-form__header">
-			<h3><?php esc_html_e( 'Send time', 'timebank' ); ?></h3>
-			<button type="button" class="timebank-icon-button" id="timebank_close_form" aria-label="<?php esc_attr_e( 'Close form', 'timebank' ); ?>">
-				&times;
-			</button>
-		</div>
+	<div id="timebank_modal" class="timebank-modal" hidden>
+		<div class="timebank-modal__backdrop" data-timebank-close></div>
+		<form id="timebank_payment" class="timebank-form timebank-form--modal" role="dialog" aria-modal="true" aria-labelledby="timebank_modal_title">
+			<div class="timebank-form__header">
+				<h3 id="timebank_modal_title"><?php esc_html_e( 'Send time', 'timebank' ); ?></h3>
+				<button type="button" class="timebank-icon-button" id="timebank_close_form" aria-label="<?php esc_attr_e( 'Close form', 'timebank' ); ?>">
+					&times;
+				</button>
+			</div>
 
-		<label class="timebank-field timebank-field--wide">
-			<span><?php esc_html_e( 'Receiver user', 'timebank' ); ?></span>
-			<input id="timebank_user_search" type="search" autocomplete="off" placeholder="<?php esc_attr_e( 'Start typing a username...', 'timebank' ); ?>">
-			<input id="timebank_receiver_id" name="receiver_id" type="hidden">
-			<div id="timebank_found_users" class="timebank-user-results" role="listbox" hidden></div>
-		</label>
+			<label class="timebank-field timebank-field--wide">
+				<span><?php esc_html_e( 'Receiver user', 'timebank' ); ?></span>
+				<input id="timebank_user_search" type="search" autocomplete="off" placeholder="<?php esc_attr_e( 'Start typing a username...', 'timebank' ); ?>">
+				<input id="timebank_receiver_id" name="receiver_id" type="hidden">
+				<div id="timebank_found_users" class="timebank-user-results" role="listbox" hidden></div>
+			</label>
 
-		<label class="timebank-field timebank-field--wide">
-			<span><?php esc_html_e( 'Description', 'timebank' ); ?></span>
-			<input name="description" type="text" maxlength="120" required>
-		</label>
+			<label class="timebank-field timebank-field--wide">
+				<span><?php esc_html_e( 'Description', 'timebank' ); ?></span>
+				<input name="description" type="text" maxlength="120" required>
+			</label>
 
-		<label class="timebank-field">
-			<span><?php esc_html_e( 'Amount', 'timebank' ); ?></span>
-			<input name="amount" type="number" min="1" step="1" required>
-		</label>
+			<label class="timebank-field">
+				<span><?php esc_html_e( 'Amount', 'timebank' ); ?></span>
+				<input name="amount" type="number" min="1" step="1" required>
+			</label>
 
-		<label class="timebank-field">
-			<span><?php esc_html_e( 'Rating', 'timebank' ); ?></span>
-			<input name="rate" type="number" min="1" max="5" step="1" value="5">
-		</label>
+			<label class="timebank-field">
+				<span><?php esc_html_e( 'Rating', 'timebank' ); ?></span>
+				<input name="rate" type="number" min="1" max="5" step="1" value="5">
+			</label>
 
-		<label class="timebank-field timebank-field--wide">
-			<span><?php esc_html_e( 'Comment', 'timebank' ); ?></span>
-			<textarea name="comment" rows="3" maxlength="200"></textarea>
-		</label>
+			<label class="timebank-field timebank-field--wide">
+				<span><?php esc_html_e( 'Comment', 'timebank' ); ?></span>
+				<textarea name="comment" rows="3" maxlength="200"></textarea>
+			</label>
 
-		<div class="timebank-form__footer">
-			<p id="timebank_form_message" class="timebank-message" aria-live="polite"></p>
-			<button type="submit" class="timebank-button timebank-button--primary">
-				<?php esc_html_e( 'Send time', 'timebank' ); ?>
-			</button>
-		</div>
-	</form>
+			<div class="timebank-form__footer">
+				<p id="timebank_form_message" class="timebank-message" aria-live="polite"></p>
+				<button type="submit" class="timebank-button timebank-button--primary">
+					<?php esc_html_e( 'Send time', 'timebank' ); ?>
+				</button>
+			</div>
+		</form>
+	</div>
 
 	<div id="timebank_front" class="timebank-transactions" aria-live="polite">
 		<div class="timebank-loading"><?php esc_html_e( 'Loading transactions...', 'timebank' ); ?></div>
@@ -108,6 +111,18 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 		showMessage('');
 	}
 
+	function openTransactionModal() {
+		$('#timebank_modal').prop('hidden', false);
+		$('body').addClass('timebank-modal-open');
+		$('#timebank_user_search').trigger('focus');
+	}
+
+	function closeTransactionModal() {
+		$('#timebank_modal').prop('hidden', true);
+		$('body').removeClass('timebank-modal-open');
+		resetForm();
+	}
+
 	function loadTransactions() {
 		$('#timebank_front').html('<div class="timebank-loading"><?php echo esc_js( __( 'Loading transactions...', 'timebank' ) ); ?></div>');
 
@@ -128,13 +143,21 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 	}
 
 	$('#timebank_open_form').on('click', function() {
-		$('#timebank_payment').prop('hidden', false);
-		$('#timebank_user_search').trigger('focus');
+		openTransactionModal();
 	});
 
 	$('#timebank_close_form').on('click', function() {
-		$('#timebank_payment').prop('hidden', true);
-		resetForm();
+		closeTransactionModal();
+	});
+
+	$('#timebank_modal').on('click', '[data-timebank-close]', function() {
+		closeTransactionModal();
+	});
+
+	$(document).on('keydown', function(event) {
+		if (event.key === 'Escape' && !$('#timebank_modal').prop('hidden')) {
+			closeTransactionModal();
+		}
 	});
 
 	$('#timebank_user_search').on('input', function() {
@@ -205,7 +228,8 @@ $rest_nonce   = wp_create_nonce( 'wp_rest' );
 			success: function(response) {
 				showMessage(response.message, 'success');
 				resetForm();
-				$('#timebank_payment').prop('hidden', true);
+				$('#timebank_modal').prop('hidden', true);
+				$('body').removeClass('timebank-modal-open');
 				loadTransactions();
 			},
 			error: function(xhr) {
