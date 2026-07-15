@@ -23,7 +23,73 @@ function userCanManageOptions(){
 //ADMIN MENU CONFIGURATION
 function timebank_options() {
     userCanManageOptions();
-      include_once "configuration_page.php";
+    $timebank_notice = '';
+
+    if ( isset( $_POST['option'] ) && 'edit' === $_POST['option'] ) {
+        $timebank_notice = timebank_save_configuration();
+    }
+
+    $config = timebank_get_configuration();
+    if ( ! $config ) {
+        $config = timebank_default_configuration();
+        $timebank_notice = '<div class="notice notice-warning"><p>' . esc_html__( 'TimeBank configuration row was not found. Default values are being shown.', 'timebank' ) . '</p></div>';
+    }
+
+    include plugin_dir_path( __FILE__ ) . 'configuration_page.php';
+}
+
+function timebank_get_configuration() {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'tbank_conf';
+    return $wpdb->get_row( "SELECT * FROM {$table_name} WHERE id = 1" );
+}
+
+function timebank_default_configuration() {
+    return (object) array(
+        'default_anonymous'  => '(deleted user)',
+        'default_min_limit'  => 120,
+        'default_max_limit'  => 180,
+        'exchange_timeout'   => 48,
+        'currency'           => 'minutes',
+        'path_to_timebank'   => '',
+        'admin_mail'         => 1,
+        'starting_amount'    => 0,
+        'email_original_text' => '',
+        'email_text'         => '',
+    );
+}
+
+function timebank_save_configuration() {
+    global $wpdb;
+
+    check_admin_referer( 'timebank_save_configuration' );
+
+    $table_name = $wpdb->prefix . 'tbank_conf';
+    $data       = array(
+        'default_anonymous' => isset( $_POST['defaultanonymous'] ) ? sanitize_text_field( wp_unslash( $_POST['defaultanonymous'] ) ) : '',
+        'default_min_limit' => isset( $_POST['defaultminlimit'] ) ? (int) $_POST['defaultminlimit'] : 0,
+        'default_max_limit' => isset( $_POST['defaultmaxlimit'] ) ? (int) $_POST['defaultmaxlimit'] : 0,
+        'exchange_timeout'  => isset( $_POST['exchangetimeout'] ) ? (int) $_POST['exchangetimeout'] : 0,
+        'currency'          => isset( $_POST['currency'] ) ? sanitize_text_field( wp_unslash( $_POST['currency'] ) ) : '',
+        'admin_mail'        => isset( $_POST['adminmail'] ) ? (int) $_POST['adminmail'] : 0,
+        'starting_amount'   => isset( $_POST['startingamount'] ) ? (int) $_POST['startingamount'] : 0,
+        'email_text'        => isset( $_POST['emailtext'] ) ? sanitize_textarea_field( wp_unslash( $_POST['emailtext'] ) ) : '',
+    );
+
+    $updated = $wpdb->update(
+        $table_name,
+        $data,
+        array( 'id' => 1 ),
+        array( '%s', '%d', '%d', '%d', '%s', '%d', '%d', '%s' ),
+        array( '%d' )
+    );
+
+    if ( false === $updated ) {
+        return '<div class="notice notice-error"><p>' . esc_html__( 'TimeBank configuration could not be saved.', 'timebank' ) . '</p></div>';
+    }
+
+    return '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'TimeBank configuration saved.', 'timebank' ) . '</p></div>';
 }
 
 // ADD CUSTOM HTML BOX INSIDE ADD / EDIT TRANSACTION

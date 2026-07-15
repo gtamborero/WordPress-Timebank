@@ -43,7 +43,7 @@ if ( ! function_exists('tbank_transaction') ) {
             'hierarchical'          => false,
             'public'                => false,
             'show_ui'               => true,
-            'show_in_menu'          => true,
+            'show_in_menu'          => false,
             'menu_position'         => 5,
             'menu_icon'             => 'dashicons-database',
             'show_in_admin_bar'     => true,

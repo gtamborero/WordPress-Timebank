@@ -1,9 +1,11 @@
 <!-- TIMEBANK STYLE INIT -->
 <div class="timebank">
 	<br /><p style="font-size:20px;"><strong><?php _e('TIME-BANK GENERAL CONFIGURATION','timebank'); ?></strong></p><hr>
+	<?php echo $timebank_notice; ?>
 
 	<form action="" method="post">
-	<input name="page" type="hidden" value="timebank_configuration" />
+	<?php wp_nonce_field( 'timebank_save_configuration' ); ?>
+	<input name="page" type="hidden" value="timebank_options" />
 	<input name="option" type="hidden" value="edit" />
 		<table border=1 width=99% >
 
