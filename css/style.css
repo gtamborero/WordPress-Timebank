@@ -278,6 +278,77 @@
 	text-align: center;
 }
 
+.timebank-login-card {
+	--tb-ink: #17202a;
+	--tb-muted: #667085;
+	--tb-border: #d9e0e7;
+	--tb-soft: #f4f7f8;
+	--tb-primary: #0f766e;
+	--tb-primary-dark: #115e59;
+	background: #ffffff;
+	border: 1px solid var(--tb-border);
+	border-radius: 8px;
+	box-sizing: border-box;
+	color: var(--tb-ink);
+	margin: 24px auto;
+	max-width: 560px;
+	padding: 24px;
+}
+
+.timebank-login-card h2 {
+	font-size: 24px;
+	line-height: 1.2;
+	margin: 4px 0 18px;
+}
+
+.timebank-login-card form p {
+	margin: 0 0 14px;
+}
+
+.timebank-login-card label {
+	color: var(--tb-muted);
+	display: block;
+	font-weight: 700;
+	margin-bottom: 6px;
+}
+
+.timebank-login-card input[type="text"],
+.timebank-login-card input[type="password"] {
+	border: 1px solid var(--tb-border);
+	border-radius: 6px;
+	box-sizing: border-box;
+	font: inherit;
+	min-height: 42px;
+	padding: 9px 11px;
+	width: 100%;
+}
+
+.timebank-login-card input[type="submit"] {
+	background: var(--tb-primary);
+	border: 1px solid var(--tb-primary);
+	border-radius: 6px;
+	color: #ffffff;
+	cursor: pointer;
+	font: inherit;
+	font-weight: 700;
+	min-height: 42px;
+	padding: 9px 16px;
+	width: 100%;
+}
+
+.timebank-login-actions,
+.timebank-login-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.timebank-login-links {
+	border-top: 1px solid var(--tb-border);
+	margin-top: 18px;
+	padding-top: 14px;
+}
+
 @media (max-width: 820px) {
 	.timebank-summary,
 	.timebank-form__footer {

@@ -17,6 +17,10 @@
 					<td><code>[timebank_view]</code></td>
 					<td><?php esc_html_e( 'Displays the TimeBank front-end view, including the transfer form and the current user transaction list.', 'timebank' ); ?></td>
 				</tr>
+				<tr>
+					<td><code>[timebank_login]</code></td>
+					<td><?php esc_html_e( 'Displays a front-end login form, or account links when the visitor is already signed in.', 'timebank' ); ?></td>
+				</tr>
 			</tbody>
 		</table>
 	</div>

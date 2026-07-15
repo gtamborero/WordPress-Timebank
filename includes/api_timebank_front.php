@@ -128,10 +128,15 @@ if ( ! class_exists( 'TimebankAPI' ) ) {
 			update_post_meta( $post_id, '_timebank_rating', $rating );
 			update_post_meta( $post_id, '_timebank_comment', $comment );
 
+			$email_sent = self::sendTransactionEmails( $post_id );
+
 			return rest_ensure_response(
 				array(
-					'id'      => $post_id,
-					'message' => __( 'Transaction created.', 'timebank' ),
+					'id'         => $post_id,
+					'email_sent' => $email_sent,
+					'message'    => $email_sent
+						? __( 'Transaction created and email notifications sent.', 'timebank' )
+						: __( 'Transaction created, but email notifications could not be sent.', 'timebank' ),
 				)
 			);
 		}
@@ -198,12 +203,109 @@ if ( ! class_exists( 'TimebankAPI' ) ) {
 		}
 
 		private static function getCurrency() {
+			$config = self::getConfig();
+
+			return ( $config && ! empty( $config->currency ) ) ? $config->currency : 'minutes';
+		}
+
+		private static function getConfig() {
 			global $wpdb;
 
 			$table_name = $wpdb->prefix . 'tbank_conf';
-			$currency = $wpdb->get_var( "SELECT currency FROM {$table_name} WHERE id = 1" );
+			return $wpdb->get_row( "SELECT * FROM {$table_name} WHERE id = 1" );
+		}
 
-			return $currency ? $currency : 'minutes';
+		private static function sendTransactionEmails( $post_id ) {
+			$config = self::getConfig();
+			$payer_id = (int) get_post_meta( $post_id, '_timebank_payer', true );
+			$receiver_id = (int) get_post_meta( $post_id, '_timebank_receiver', true );
+			$payer = get_user_by( 'id', $payer_id );
+			$receiver = get_user_by( 'id', $receiver_id );
+
+			if ( ! $payer || ! $receiver ) {
+				return false;
+			}
+
+			$recipients = array_filter(
+				array_unique(
+					array(
+						$payer->user_email,
+						$receiver->user_email,
+					)
+				)
+			);
+
+			if ( $config && ! empty( $config->admin_mail ) ) {
+				$recipients[] = get_option( 'admin_email' );
+			}
+
+			$recipients = array_filter( array_unique( $recipients ), 'is_email' );
+
+			if ( empty( $recipients ) ) {
+				return false;
+			}
+
+			$subject = sprintf(
+				/* translators: %s is the transaction title. */
+				__( 'New TimeBank transaction: %s', 'timebank' ),
+				get_the_title( $post_id )
+			);
+
+			$message = self::buildTransactionEmailMessage( $post_id, $config, $payer, $receiver );
+			$from_email = is_email( get_option( 'admin_email' ) ) ? get_option( 'admin_email' ) : 'wordpress@timebank.local';
+			$from_name = sanitize_text_field( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+			$headers = array(
+				'Content-Type: text/plain; charset=UTF-8',
+				'From: ' . $from_name . ' <' . $from_email . '>',
+			);
+			$all_sent = true;
+
+			foreach ( $recipients as $recipient ) {
+				if ( ! wp_mail( $recipient, $subject, $message, $headers ) ) {
+					$all_sent = false;
+				}
+			}
+
+			return $all_sent;
+		}
+
+		private static function buildTransactionEmailMessage( $post_id, $config, $payer, $receiver ) {
+			$currency = ( $config && ! empty( $config->currency ) ) ? $config->currency : 'minutes';
+			$amount = (int) get_post_meta( $post_id, '_timebank_amount', true );
+			$comment = get_post_meta( $post_id, '_timebank_comment', true );
+			$site_url = home_url();
+			$template = ( $config && ! empty( $config->email_text ) )
+				? $config->email_text
+				: "Hello!\nA new TimeBank transaction has been created on {site_url}.\n\nDescription: {description}\nAmount: {amount} {currency}\nPayer: {payer_name} <{payer_email}>\nReceiver: {receiver_name} <{receiver_email}>\nComment: {comment}\n\nThe {site_name} Team.";
+
+			$replacements = array(
+				'{site_name}'       => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+				'{site_url}'        => $site_url,
+				'{description}'     => get_the_title( $post_id ),
+				'{amount}'          => $amount,
+				'{currency}'        => $currency,
+				'{payer_name}'      => self::getUserDisplayName( $payer ),
+				'{payer_email}'     => $payer->user_email,
+				'{receiver_name}'   => self::getUserDisplayName( $receiver ),
+				'{receiver_email}'  => $receiver->user_email,
+				'{comment}'         => $comment,
+				'{transaction_url}' => admin_url( 'post.php?post=' . $post_id . '&action=edit' ),
+				'$siteUrl'          => $site_url,
+				'$status_name'      => __( 'created', 'timebank' ),
+				'$data->concept'    => get_the_title( $post_id ),
+				'$data->amount'     => $amount,
+				'$data->buyer_name' => self::getUserDisplayName( $payer ),
+				'$data->buyer_email' => $payer->user_email,
+				'$data->seller_name' => self::getUserDisplayName( $receiver ),
+				'$data->seller_email' => $receiver->user_email,
+				'$data->datetime_created' => get_the_date( 'Y-m-d H:i:s', $post_id ),
+			);
+
+			return strtr( $template, $replacements );
+		}
+
+		private static function getUserDisplayName( $user ) {
+			return $user->display_name ? $user->display_name : $user->user_login;
 		}
 	}
 }

@@ -77,6 +77,60 @@ function timebank_front_view(){
   return ob_get_clean();
 }
 
+function timebank_login_view() {
+  if ( is_user_logged_in() ) {
+    $current_user = wp_get_current_user();
+    $profile_url = function_exists( 'bp_loggedin_user_url' ) ? bp_loggedin_user_url() : get_edit_user_link( $current_user->ID );
+    $messages_url = function_exists( 'bp_loggedin_user_url' ) ? trailingslashit( bp_loggedin_user_url() ) . 'messages/' : $profile_url;
+    $timebank_page = get_page_by_path( 'timebank' );
+    $timebank_url = $timebank_page ? get_permalink( $timebank_page ) : home_url( '/' );
+
+    ob_start();
+    ?>
+    <div class="timebank-login-card">
+      <p class="timebank-eyebrow"><?php esc_html_e( 'Signed in', 'timebank' ); ?></p>
+      <h2><?php echo esc_html( $current_user->display_name ? $current_user->display_name : $current_user->user_login ); ?></h2>
+      <div class="timebank-login-actions">
+        <a class="timebank-button timebank-button--primary" href="<?php echo esc_url( $timebank_url ); ?>"><?php esc_html_e( 'Open TimeBank', 'timebank' ); ?></a>
+        <a class="timebank-button" href="<?php echo esc_url( $profile_url ); ?>"><?php esc_html_e( 'My profile', 'timebank' ); ?></a>
+        <a class="timebank-button" href="<?php echo esc_url( $messages_url ); ?>"><?php esc_html_e( 'Messages', 'timebank' ); ?></a>
+        <a class="timebank-button" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Log out', 'timebank' ); ?></a>
+      </div>
+    </div>
+    <?php
+    return ob_get_clean();
+  }
+
+  ob_start();
+  $timebank_page = get_page_by_path( 'timebank' );
+  $timebank_url = $timebank_page ? get_permalink( $timebank_page ) : home_url( '/' );
+  ?>
+  <div class="timebank-login-card">
+    <p class="timebank-eyebrow"><?php esc_html_e( 'Member access', 'timebank' ); ?></p>
+    <h2><?php esc_html_e( 'Log in to your TimeBank account', 'timebank' ); ?></h2>
+    <?php
+    wp_login_form(
+      array(
+        'echo'           => true,
+        'redirect'       => $timebank_url,
+        'label_username' => __( 'Username or email', 'timebank' ),
+        'label_password' => __( 'Password', 'timebank' ),
+        'label_remember' => __( 'Remember me', 'timebank' ),
+        'label_log_in'   => __( 'Log in', 'timebank' ),
+      )
+    );
+    ?>
+    <div class="timebank-login-links">
+      <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php esc_html_e( 'Forgot your password?', 'timebank' ); ?></a>
+      <?php if ( get_option( 'users_can_register' ) ) : ?>
+        <a href="<?php echo esc_url( wp_registration_url() ); ?>"><?php esc_html_e( 'Create account', 'timebank' ); ?></a>
+      <?php endif; ?>
+    </div>
+  </div>
+  <?php
+  return ob_get_clean();
+}
+
 //CSS STYLE FOR PUBLIC
 add_action( 'wp_enqueue_scripts', 'timebank_stylesheet' );
 function timebank_stylesheet(){
@@ -119,6 +173,7 @@ function timebank_load_textdomain() {
 
 //SHORT CODE for timebank front view
 add_shortcode('timebank_view', 'timebank_front_view');
+add_shortcode('timebank_login', 'timebank_login_view');
 
 // Add on author page end timebank page
 add_action( 'loop_end', 'timebank_author_loop_end' );
